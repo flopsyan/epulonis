@@ -379,7 +379,7 @@ img { max-width: 100%; display: block; }
 .req { color: var(--primary); }
 .hint { font-size: .82rem; color: var(--muted); margin: 6px 0 0; }
 
-input[type="text"], input[type="url"], input[type="number"], input[type="search"], textarea, select {
+input:not([type]), input[type="text"], input[type="url"], input[type="number"], input[type="search"], textarea, select {
   width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm); background: var(--surface); color: var(--text);
   font-family: var(--sans); font-size: .95rem; transition: border-color .15s, box-shadow .15s;

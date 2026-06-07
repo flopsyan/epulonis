@@ -86,11 +86,11 @@
     <div class="rows ingredient-rows" id="ingredient-rows">
       <% recipe.ingredients.forEach((ing) => { %>
         <div class="row ingredient-row">
-          <input class="cell-amount" data-field="amount" inputmode="decimal" placeholder="Menge"
+          <input type="text" class="cell-amount" data-field="amount" inputmode="decimal" placeholder="Menge"
                  value="<%= ing.amount === null || ing.amount === undefined ? '' : formatAmount(ing.amount) %>" />
-          <input class="cell-unit" data-field="unit" placeholder="Einheit" list="unit-list" value="<%= ing.unit %>" />
-          <input class="cell-name" data-field="name" placeholder="Zutat" value="<%= ing.name %>" />
-          <input class="cell-note" data-field="note" placeholder="Notiz (optional)" value="<%= ing.note %>" />
+          <input type="text" class="cell-unit" data-field="unit" placeholder="Einheit" list="unit-list" value="<%= ing.unit %>" />
+          <input type="text" class="cell-name" data-field="name" placeholder="Zutat" value="<%= ing.name %>" />
+          <input type="text" class="cell-note" data-field="note" placeholder="Notiz (optional)" value="<%= ing.note %>" />
           <button type="button" class="row-remove" aria-label="Zutat entfernen">✕</button>
         </div>
       <% }) %>

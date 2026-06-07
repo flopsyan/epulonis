@@ -12,10 +12,10 @@ function el(html) {
 function ingredientRow() {
   return el(`
     <div class="row ingredient-row">
-      <input class="cell-amount" data-field="amount" inputmode="decimal" placeholder="Menge" />
-      <input class="cell-unit" data-field="unit" placeholder="Einheit" list="unit-list" />
-      <input class="cell-name" data-field="name" placeholder="Zutat" />
-      <input class="cell-note" data-field="note" placeholder="Notiz (optional)" />
+      <input type="text" class="cell-amount" data-field="amount" inputmode="decimal" placeholder="Menge" />
+      <input type="text" class="cell-unit" data-field="unit" placeholder="Einheit" list="unit-list" />
+      <input type="text" class="cell-name" data-field="name" placeholder="Zutat" />
+      <input type="text" class="cell-note" data-field="note" placeholder="Notiz (optional)" />
       <button type="button" class="row-remove" aria-label="Zutat entfernen">✕</button>
     </div>`);
 }
