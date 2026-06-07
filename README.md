@@ -22,6 +22,12 @@ recipes – with a servings calculator and a live match against your own pantry.
 - **Pantry:** record what you have at home (in grams, litres, pieces …). Every recipe then shows
   **live** whether an ingredient is *in stock*, *too little* or *missing* – including automatic
   amount/unit conversion (g/kg, ml/l) and singular/plural tolerance (e.g. *lemon* ↔ *lemons*).
+- **Subtract from pantry:** after cooking, one click on the recipe opens a dialog pre-filled with the
+  (scaled) ingredient amounts. Add or remove entries and tweak the amounts you actually used, then
+  confirm – the matching pantry items are reduced automatically (with unit conversion).
+- **Accounts & edit protection (login):** public and read-only by default; editing requires a login.
+  Add accounts for friends (all with equal rights), each with a **profile** (display name, avatar,
+  password). Recipes show their **creator**. Ideal behind a reverse proxy – visitors browse, members edit.
 - **Light & dark mode** with a switch in the footer (defaults to **System**).
 - **English & German UI** with a language switch in the footer (defaults to **English**).
 - **Images from the web** via URL, with an elegant placeholder if an image fails to load.
@@ -84,15 +90,39 @@ npm run seed     # seed demo data manually ( -- --force to override )
 
 Everything is configured via environment variables (see `.env.example`):
 
-| Variable     | Default     | Meaning |
-| ------------ | ----------- | ------- |
-| `PORT`       | `3000`      | Port the platform runs on |
-| `SITE_NAME`  | `Epulonis`  | Name shown in the header and browser tab |
-| `SEED_DEMO`  | `true`      | Seed demo data on the very first start |
-| `DATA_DIR`   | `./data`    | Storage location of the SQLite database (without Docker) |
+| Variable        | Default     | Meaning |
+| --------------- | ----------- | ------- |
+| `PORT`          | `3000`      | Port the platform runs on |
+| `SITE_NAME`     | `Epulonis`  | Name shown in the header and browser tab |
+| `SEED_DEMO`     | `true`      | Seed demo data on the very first start |
+| `DATA_DIR`      | `./data`    | Storage location of the SQLite database (without Docker) |
+| `AUTH_PASSWORD` | *(empty)*   | Password for the first admin account. Empty + no account = whole site read-only |
+| `AUTH_USER`     | `admin`     | Username for the first admin account |
+| `AUTH_SECRET`   | *(random)*  | Optional secret for signing session cookies; a random one is stored in the DB if empty |
 
 > Demo data is only created **once**. If you later empty the database, nothing comes back
 > unexpectedly. For an empty start, set `SEED_DEMO=false`.
+
+### Accounts & edit protection (login)
+
+The site is **read-only by default**. Set `AUTH_PASSWORD` (and optionally `AUTH_USER`) to bootstrap
+the first **admin account** on the first start, then log in via the **Log in** button in the header
+(or at `/login`).
+
+- As long as `AUTH_PASSWORD` is empty **and** no account exists, **nobody** can edit – the site is
+  read-only for everyone.
+- Visitors can always browse everything; creating/editing recipes, changing the pantry and
+  subtracting from it require a login.
+- **Multiple users:** open the avatar menu (top right) → **Settings** to add or remove accounts.
+  All accounts have the **same rights** (there are no roles) – ideal for sharing with friends.
+- **Profile:** avatar menu → **Profile** to set a display name, upload an avatar (resized in the
+  browser, stored in the DB) and change your password.
+- Recipes show their **creator** in the recipe header.
+- Login uses a signed, `HttpOnly` session cookie (valid 30 days). Changing a password invalidates
+  that account's existing sessions.
+
+This pairs well with a reverse proxy: expose the site publicly for reading and keep editing behind
+your own login.
 
 ---
 

@@ -14,6 +14,10 @@ services:
       # Seed example data on the very first start (true/false)
       SEED_DEMO: ${SEED_DEMO:-true}
       NODE_ENV: production
+      # Edit protection: leave AUTH_PASSWORD empty to keep the site read-only.
+      AUTH_USER: ${AUTH_USER:-admin}
+      AUTH_PASSWORD: ${AUTH_PASSWORD:-}
+      AUTH_SECRET: ${AUTH_SECRET:-}
     volumes:
       # Persistent data (SQLite database)
       - recipe-data:/app/data

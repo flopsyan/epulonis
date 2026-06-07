@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+
+<div class="auth-page">
+  <section class="form-card auth-card">
+    <h1><%= t('login_title') %></h1>
+    <p class="page-sub"><%= t('login_sub') %></p>
+
+    <% if (error) { %>
+      <div class="auth-error" role="alert"><%= t('login_error') %></div>
+    <% } %>
+
+    <form method="post" action="/login" autocomplete="on">
+      <input type="hidden" name="next" value="<%= next %>" />
+      <div class="field">
+        <label for="login-user"><%= t('login_user') %></label>
+        <input type="text" id="login-user" name="username" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label for="login-pass"><%= t('login_password') %></label>
+        <input type="password" id="login-pass" name="password" autocomplete="current-password" required autofocus />
+      </div>
+      <div class="form-actions">
+        <a class="btn btn-ghost" href="/"><%= t('cancel') %></a>
+        <button type="submit" class="btn btn-primary"><%= t('login_submit') %></button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<%- include('partials/footer') %>

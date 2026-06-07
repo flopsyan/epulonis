@@ -30,6 +30,8 @@ function sanitize(data) {
     cook_time: parseIntOr(data.cook_time, 0),
     difficulty: DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'Medium',
     notes: String(data.notes || '').trim(),
+    author_id: data.author_id != null && data.author_id !== '' ? Number(data.author_id) : null,
+    author_name: String(data.author_name || '').trim(),
     tags: Array.isArray(data.tags) ? data.tags : [],
     ingredients: (Array.isArray(data.ingredients) ? data.ingredients : [])
       .map((i) => ({
@@ -47,9 +49,9 @@ function sanitize(data) {
 
 const insertRecipeStmt = db.prepare(`
   INSERT INTO recipes
-    (slug, title, description, image_url, servings, servings_unit, prep_time, cook_time, difficulty, notes)
+    (slug, title, description, image_url, servings, servings_unit, prep_time, cook_time, difficulty, notes, author_id, author_name)
   VALUES
-    (@slug, @title, @description, @image_url, @servings, @servings_unit, @prep_time, @cook_time, @difficulty, @notes)
+    (@slug, @title, @description, @image_url, @servings, @servings_unit, @prep_time, @cook_time, @difficulty, @notes, @author_id, @author_name)
 `);
 const insertIngredientStmt = db.prepare(`
   INSERT INTO ingredients (recipe_id, position, amount, unit, name, note)

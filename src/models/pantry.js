@@ -1,5 +1,5 @@
 import db from '../db.js';
-import { normalizeName } from '../lib/units.js';
+import { normalizeName, consumeAmount } from '../lib/units.js';
 
 export function allPantry() {
   return db.prepare('SELECT * FROM pantry_items ORDER BY name COLLATE NOCASE ASC').all();
@@ -39,3 +39,40 @@ export function upsertPantry({ name, amount, unit }) {
 export function deletePantry(id) {
   return db.prepare('DELETE FROM pantry_items WHERE id = ?').run(id);
 }
+
+// Subtracts a list of used amounts from the pantry (e.g. after cooking a
+// recipe). Each item is matched by normalized name; amounts/units are converted
+// automatically. Items without a match or with incomparable units are reported
+// as skipped. Runs as a single transaction.
+// items: [{ name, amount, unit }]
+export const consumePantry = db.transaction((items) => {
+  const findStmt = db.prepare('SELECT * FROM pantry_items WHERE name_norm = ?');
+  const updateStmt = db.prepare(
+    `UPDATE pantry_items SET amount = ?, updated_at = datetime('now') WHERE id = ?`
+  );
+
+  const results = [];
+  for (const raw of items || []) {
+    const name = String(raw?.name || '').trim();
+    if (!name) continue;
+
+    const item = findStmt.get(normalizeName(name));
+    if (!item) {
+      results.push({ name, status: 'missing' });
+      continue;
+    }
+
+    const newAmount = consumeAmount(
+      { amount: item.amount, unit: item.unit },
+      { amount: raw.amount, unit: raw.unit }
+    );
+    if (newAmount == null) {
+      results.push({ name, status: 'incompatible' });
+      continue;
+    }
+
+    updateStmt.run(newAmount, item.id);
+    results.push({ name, status: 'ok', newAmount, unit: item.unit });
+  }
+  return results;
+});

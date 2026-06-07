@@ -42,8 +42,34 @@
       <nav class="nav">
         <a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>"><%= t('nav_recipes') %></a>
         <a href="/pantry" class="nav-link <%= currentPath.startsWith('/pantry') ? 'active' : '' %>"><%= t('nav_pantry') %></a>
-        <a href="/new" class="btn btn-primary nav-new"><%= t('nav_new') %></a>
+        <% if (locals.authed) { %>
+          <a href="/new" class="btn btn-primary nav-new"><%= t('nav_new') %></a>
+        <% } %>
       </nav>
+
+      <% if (locals.authed) { %>
+        <div class="user-menu" id="user-menu">
+          <button type="button" class="avatar-btn" id="avatar-btn" aria-haspopup="true" aria-expanded="false" aria-label="<%= t('account_menu') %>">
+            <%- include('avatar', { avatarUser: locals.user, avatarClass: 'avatar-sm' }) %>
+          </button>
+          <div class="user-dropdown" id="user-dropdown" role="menu" hidden>
+            <div class="user-card">
+              <%- include('avatar', { avatarUser: locals.user, avatarClass: 'avatar-md' }) %>
+              <span class="user-card-text">
+                <span class="user-card-name"><%= locals.user.display_name || locals.user.username %></span>
+                <span class="user-card-sub">@<%= locals.user.username %></span>
+              </span>
+            </div>
+            <a href="/profile" role="menuitem" class="dropdown-item"><span class="mi-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span> <%= t('menu_profile') %></a>
+            <a href="/settings" role="menuitem" class="dropdown-item"><span class="mi-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> <%= t('menu_settings') %></a>
+            <form method="post" action="/logout" class="dropdown-form">
+              <button type="submit" role="menuitem" class="dropdown-item dropdown-item-btn"><span class="mi-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> <%= t('logout') %></button>
+            </form>
+          </div>
+        </div>
+      <% } else if (locals.loginAvailable) { %>
+        <a href="/login<%= currentPath === '/login' ? '' : '?next=' + encodeURIComponent(currentUrl) %>" class="btn btn-ghost btn-sm login-btn"><%= t('login') %></a>
+      <% } %>
     </div>
   </header>
 

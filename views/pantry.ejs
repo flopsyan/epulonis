@@ -1,11 +1,14 @@
 <%- include('partials/header') %>
 
+<% const canEdit = locals.authed; %>
+
 <div class="page-head">
   <h1><%= t('pantry_title') %></h1>
   <p class="page-sub"><%= t('pantry_sub') %></p>
 </div>
 
-<div class="pantry-layout">
+<div class="pantry-layout <%= canEdit ? '' : 'readonly' %>">
+  <% if (canEdit) { %>
   <section class="form-card pantry-form-card">
     <h2 class="form-section-title" id="pantry-form-title"><%= t('add_item') %></h2>
     <form class="pantry-form" method="post" action="/pantry" id="pantry-form">
@@ -30,6 +33,7 @@
       </div>
     </form>
   </section>
+  <% } %>
 
   <section class="pantry-list-wrap">
     <% if (items.length === 0) { %>
@@ -50,6 +54,7 @@
             <span class="pantry-item-qty">
               <% if (item.amount !== null) { %><%= formatAmount(item.amount) %> <% } %><%= item.unit %>
             </span>
+            <% if (canEdit) { %>
             <span class="pantry-item-actions">
               <button type="button" class="icon-btn pantry-edit" title="<%= t('p_edit') %>">✎</button>
               <form method="post" action="/pantry/<%= item.id %>/delete"
@@ -57,6 +62,7 @@
                 <button type="submit" class="icon-btn danger" title="<%= t('p_remove') %>">🗑</button>
               </form>
             </span>
+            <% } %>
           </li>
         <% }) %>
       </ul>

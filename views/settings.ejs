@@ -1,0 +1,76 @@
+<%- include('partials/header') %>
+
+<div class="page-head">
+  <h1><%= t('settings_title') %></h1>
+  <p class="page-sub"><%= t('settings_sub') %></p>
+</div>
+
+<!-- Appearance -->
+<section class="form-card">
+  <h2 class="form-section-title"><%= t('appearance') %></h2>
+  <div class="setting-row">
+    <span class="setting-label"><%= t('theme_aria') %></span>
+    <div class="switch theme-switch" role="group" aria-label="<%= t('theme_aria') %>">
+      <button type="button" class="switch-btn" data-theme-choice="system"><%= t('theme_system') %></button>
+      <button type="button" class="switch-btn" data-theme-choice="light"><%= t('theme_light') %></button>
+      <button type="button" class="switch-btn" data-theme-choice="dark"><%= t('theme_dark') %></button>
+    </div>
+  </div>
+  <div class="setting-row">
+    <span class="setting-label"><%= t('lang_aria') %></span>
+    <div class="switch lang-switch" role="group" aria-label="<%= t('lang_aria') %>">
+      <button type="button" class="switch-btn <%= lang === 'en' ? 'active' : '' %>" data-lang-choice="en">EN</button>
+      <button type="button" class="switch-btn <%= lang === 'de' ? 'active' : '' %>" data-lang-choice="de">DE</button>
+    </div>
+  </div>
+</section>
+
+<!-- User management -->
+<section class="form-card">
+  <h2 class="form-section-title"><%= t('users_title') %></h2>
+  <p class="hint"><%= t('users_sub') %></p>
+
+  <% if (error) { %><div class="flash err"><%= t('err_' + error) %></div><% } %>
+  <% if (created) { %><div class="flash ok"><%= t('user_created') %> „<%= created %>"</div><% } %>
+
+  <ul class="user-list">
+    <% users.forEach((u) => { %>
+      <li class="user-row">
+        <%- include('partials/avatar', { avatarUser: u, avatarClass: 'avatar-md' }) %>
+        <span class="user-row-text">
+          <span class="user-row-name"><%= u.display_name || u.username %><% if (u.id === locals.user.id) { %> <span class="you-badge"><%= t('you') %></span><% } %></span>
+          <span class="user-row-sub">@<%= u.username %></span>
+        </span>
+        <% if (users.length > 1) { %>
+          <form method="post" action="/settings/users/<%= u.id %>/delete"
+                onsubmit="return confirm('<%= u.id === locals.user.id ? t('confirm_delete_self') : t('confirm_delete_user') %>');">
+            <button type="submit" class="icon-btn danger" title="<%= t('p_remove') %>">🗑</button>
+          </form>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+
+  <h3 class="subhead"><%= t('add_user') %></h3>
+  <form method="post" action="/settings/users" class="user-add-form" autocomplete="off">
+    <div class="grid-2">
+      <div class="field">
+        <label for="new-username"><%= t('login_user') %></label>
+        <input type="text" id="new-username" name="username" required placeholder="z. B. anna" />
+      </div>
+      <div class="field">
+        <label for="new-display"><%= t('display_name') %></label>
+        <input type="text" id="new-display" name="display_name" placeholder="<%= t('display_name_ph') %>" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="new-password"><%= t('login_password') %></label>
+      <input type="password" id="new-password" name="password" autocomplete="new-password" required />
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><%= t('add_user') %></button>
+    </div>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

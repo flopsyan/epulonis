@@ -1,6 +1,7 @@
 <%- include('partials/header') %>
 
 <%
+  const canEdit = locals.authed;
   // Initial render of the pantry pill (JS recomputes live).
   function pill(status) {
     switch (status) {
@@ -47,14 +48,27 @@
         <div class="badge"><span class="badge-ico">⏲</span><span><span class="badge-k"><%= t('total') %></span><span class="badge-v"><%= formatTime(totalTime) %></span></span></div>
       <% } %>
       <div class="badge"><span class="badge-ico">📊</span><span><span class="badge-k"><%= t('difficulty') %></span><span class="badge-v"><%= t('diff_' + recipe.difficulty) %></span></span></div>
+      <% if (author || recipe.author_name) { %>
+        <div class="badge">
+          <% if (author) { %>
+            <%- include('partials/avatar', { avatarUser: author, avatarClass: 'avatar-xs' }) %>
+            <span><span class="badge-k"><%= t('creator') %></span><span class="badge-v"><%= author.display_name || author.username %></span></span>
+          <% } else { %>
+            <%- include('partials/avatar', { avatarUser: null, avatarClass: 'avatar-xs' }) %>
+            <span><span class="badge-k"><%= t('creator') %></span><span class="badge-v"><%= t('deleted_user') %></span></span>
+          <% } %>
+        </div>
+      <% } %>
     </div>
 
-    <div class="recipe-actions">
-      <a class="btn btn-ghost" href="/recipe/<%= recipe.slug %>/edit">✎ <%= t('edit') %></a>
-      <form method="post" action="/recipe/<%= recipe.slug %>/delete" onsubmit="return confirm('<%= t('confirm_delete') %>');">
-        <button type="submit" class="btn btn-danger">🗑 <%= t('delete') %></button>
-      </form>
-    </div>
+    <% if (canEdit) { %>
+      <div class="recipe-actions">
+        <a class="btn btn-ghost" href="/recipe/<%= recipe.slug %>/edit">✎ <%= t('edit') %></a>
+        <form method="post" action="/recipe/<%= recipe.slug %>/delete" onsubmit="return confirm('<%= t('confirm_delete') %>');">
+          <button type="submit" class="btn btn-danger">🗑 <%= t('delete') %></button>
+        </form>
+      </div>
+    <% } %>
   </header>
 
   <div class="recipe-layout">
@@ -95,6 +109,10 @@
         <% }) %>
       </ul>
 
+      <% if (canEdit) { %>
+        <button type="button" class="btn btn-ghost btn-sm consume-btn" id="consume-open">🧺 <%= t('consume_open') %></button>
+      <% } %>
+
       <div class="pantry-legend">
         <span><i class="dot ok"></i> <%= t('legend_ok') %></span>
         <span><i class="dot low"></i> <%= t('legend_low') %></span>
@@ -126,6 +144,30 @@
     </section>
   </div>
 </article>
+
+<% if (canEdit) { %>
+  <dialog id="consume-dialog" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2><%= t('consume_title') %></h2>
+        <button type="button" class="icon-btn" id="consume-x" aria-label="<%= t('cancel') %>">✕</button>
+      </div>
+      <p class="modal-sub"><%= t('consume_sub') %></p>
+      <div class="consume-rows" id="consume-rows"></div>
+      <button type="button" class="btn btn-ghost btn-sm consume-add" id="consume-add"><%= t('consume_add') %></button>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="consume-cancel"><%= t('cancel') %></button>
+        <button type="button" class="btn btn-primary" id="consume-confirm"><%= t('consume_confirm') %></button>
+      </div>
+    </div>
+  </dialog>
+  <datalist id="consume-names"></datalist>
+  <datalist id="consume-units">
+    <option value="g"></option><option value="kg"></option>
+    <option value="ml"></option><option value="l"></option>
+    <option value="pcs"></option>
+  </datalist>
+<% } %>
 
 <script type="application/json" id="pantry-data"><%- pantryJson %></script>
 

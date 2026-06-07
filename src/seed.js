@@ -5,6 +5,7 @@
 import { getMeta, setMeta } from './db.js';
 import { createRecipe, countRecipes } from './models/recipes.js';
 import { upsertPantry } from './models/pantry.js';
+import { listUsers } from './models/users.js';
 
 const img = (id) =>
   `https://images.unsplash.com/photo-${id}?w=1200&q=80&auto=format&fit=crop`;
@@ -133,7 +134,14 @@ export function seedDemo({ force = false } = {}) {
     setMeta('demo_seeded', '1');
     return false;
   }
-  for (const recipe of RECIPES) createRecipe(recipe);
+  // Attribute demo recipes to the first account (the bootstrapped admin), if any.
+  const admin = listUsers()[0] ?? null;
+  for (const recipe of RECIPES)
+    createRecipe({
+      ...recipe,
+      author_id: admin?.id ?? null,
+      author_name: admin ? admin.display_name || admin.username : '',
+    });
   for (const item of PANTRY) upsertPantry(item);
   setMeta('demo_seeded', '1');
   return true;

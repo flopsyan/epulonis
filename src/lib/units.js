@@ -41,6 +41,28 @@ export function toBase(amount, unit) {
   return { dimension: `other:${u}`, value };
 }
 
+// Inverse of toBase: convert a value in base units back into `unit`.
+export function baseToUnit(baseValue, unit) {
+  const u = normalizeUnit(unit);
+  if (u in MASS) return baseValue / MASS[u];
+  if (u in VOLUME) return baseValue / VOLUME[u];
+  return baseValue; // count / other units are stored 1:1
+}
+
+// Subtracts a needed amount from a pantry entry and returns the remaining
+// amount expressed in the pantry entry's own unit (never below 0). Returns null
+// when the subtraction is not possible (no/zero amount, incomparable units, or
+// the pantry entry has no amount to subtract from).
+export function consumeAmount(have, need) {
+  const needBase = toBase(need.amount, need.unit);
+  const haveBase = toBase(have.amount, have.unit);
+  if (needBase.value == null || needBase.value <= 0) return null;
+  if (haveBase.value == null || needBase.dimension !== haveBase.dimension) return null;
+  let remaining = baseToUnit(haveBase.value - needBase.value, have.unit);
+  if (remaining < 0) remaining = 0;
+  return Math.round(remaining * 1000) / 1000;
+}
+
 // Normalizes ingredient/pantry names for matching and unifies simple English
 // plurals (egg/eggs, lemon/lemons, tomato/tomatoes, berry/berries) so that
 // e.g. "1 lemon" in a recipe matches "Lemons" in the pantry.

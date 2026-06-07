@@ -8,6 +8,7 @@ import pagesRouter from './routes/pages.js';
 import apiRouter from './routes/api.js';
 import { formatAmount, formatTime } from './lib/format.js';
 import { langFromRequest, makeT, clientStrings } from './lib/i18n.js';
+import { attachAuth, loginPossible, bootstrapAdmin } from './lib/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
@@ -26,9 +27,9 @@ app.locals.formatTime = formatTime;
 // Changes on every (re)start -> busts the browser cache for CSS/JS after deploys
 app.locals.assetVersion = process.env.ASSET_VERSION || String(Date.now());
 
-// Body parsers for forms and JSON
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
-app.use(express.json({ limit: '1mb' }));
+// Body parsers for forms and JSON (a bit of headroom for avatar data URLs)
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+app.use(express.json({ limit: '2mb' }));
 
 // Static files (CSS, client JS)
 app.use(
@@ -46,9 +47,13 @@ app.use((req, res, next) => {
   // string table for the browser modules, safe to embed in a <script> tag
   res.locals.i18nJson = JSON.stringify(clientStrings(lang)).replace(/</g, '\\u003c');
   res.locals.currentPath = req.path;
+  res.locals.currentUrl = req.originalUrl;
   res.locals.searchQuery = req.query.q || '';
   next();
 });
+
+// Auth state (read-only vs. logged-in) for all views and route guards
+app.use(attachAuth);
 
 // Routes
 app.use('/api', apiRouter);
@@ -69,6 +74,13 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Create the first admin account from AUTH_USER/AUTH_PASSWORD if needed
+try {
+  bootstrapAdmin();
+} catch (e) {
+  console.error('Could not bootstrap admin account:', e);
+}
+
 // Seed demo data on startup if needed
 if (process.env.SEED_DEMO !== 'false') {
   try {
@@ -81,4 +93,9 @@ if (process.env.SEED_DEMO !== 'false') {
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => {
   console.log(`${app.locals.siteName} is running at http://localhost:${port}`);
+  if (loginPossible()) {
+    console.log('Edit protection is ON – log in at /login to edit. Manage accounts under Settings.');
+  } else {
+    console.log('Edit protection: read-only mode (set AUTH_PASSWORD to bootstrap the first account).');
+  }
 });

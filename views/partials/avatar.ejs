@@ -1,0 +1,14 @@
+<%
+  // Reusable avatar: shows the uploaded image, or a colored circle with the
+  // first letter as a fallback. Pass { avatarUser, avatarClass }.
+  const _u = (typeof avatarUser !== 'undefined') ? avatarUser : null;
+  const _cls = (typeof avatarClass !== 'undefined') ? avatarClass : '';
+  const _initial = (((_u && (_u.display_name || _u.username)) || '?').trim().charAt(0) || '?').toUpperCase();
+%>
+<span class="avatar <%= _cls %>" data-fallback="<%= _initial %>">
+  <% if (_u && _u.avatar) { %>
+    <img src="<%= _u.avatar %>" alt="" />
+  <% } else { %>
+    <span class="avatar-initial"><%= _initial %></span>
+  <% } %>
+</span>

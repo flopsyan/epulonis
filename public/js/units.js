@@ -30,6 +30,25 @@ export function toBase(amount, unit) {
   return { dimension: `other:${u}`, value };
 }
 
+export function baseToUnit(baseValue, unit) {
+  const u = normalizeUnit(unit);
+  if (u in MASS) return baseValue / MASS[u];
+  if (u in VOLUME) return baseValue / VOLUME[u];
+  return baseValue;
+}
+
+// Remaining pantry amount (in have's unit) after subtracting need, or null when
+// not possible. Mirrors consumeAmount() in src/lib/units.js.
+export function consumeAmount(have, need) {
+  const needBase = toBase(need.amount, need.unit);
+  const haveBase = toBase(have.amount, have.unit);
+  if (needBase.value == null || needBase.value <= 0) return null;
+  if (haveBase.value == null || needBase.dimension !== haveBase.dimension) return null;
+  let remaining = baseToUnit(haveBase.value - needBase.value, have.unit);
+  if (remaining < 0) remaining = 0;
+  return Math.round(remaining * 1000) / 1000;
+}
+
 export function normalizeName(name) {
   let n = String(name ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
   if (n.length > 4 && n.endsWith('ies')) return n.slice(0, -3) + 'y';

@@ -10,10 +10,33 @@ import {
 import { allTagsWithCounts, getTagBySlug } from '../models/tags.js';
 import { allPantry, pantryMap, upsertPantry, deletePantry } from '../models/pantry.js';
 import { normalizeName, pantryStatus } from '../lib/units.js';
+import {
+  requireAuth,
+  loginPossible,
+  authenticate,
+  setSessionCookie,
+  clearSessionCookie,
+} from '../lib/auth.js';
+import {
+  publicUser,
+  getUserById,
+  verifyPassword,
+  listUsers,
+  createUser,
+  updateProfile,
+  changePassword,
+  deleteUser,
+} from '../models/users.js';
 
 const router = express.Router();
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
+
+// Restrict a redirect target to local paths (no open redirects).
+function safeNext(next) {
+  const n = String(next || '/');
+  return n.startsWith('/') && !n.startsWith('//') && !n.startsWith('/\\') ? n : '/';
+}
 
 // Turns raw form data into a clean data object.
 function normalizeRecipeBody(body) {
@@ -60,8 +83,91 @@ router.get('/', (req, res) => {
   });
 });
 
+// --- Login / logout --------------------------------------------------------
+router.get('/login', (req, res) => {
+  if (!loginPossible() || req.authed) return res.redirect(safeNext(req.query.next));
+  res.render('login', {
+    title: req.t('title_login'),
+    error: false,
+    next: safeNext(req.query.next),
+  });
+});
+
+router.post('/login', (req, res) => {
+  if (!loginPossible()) return res.redirect('/');
+  const next = safeNext(req.body.next);
+  const user = authenticate(req.body.username, req.body.password);
+  if (user) {
+    setSessionCookie(res, req, user);
+    return res.redirect(next);
+  }
+  res.status(401).render('login', { title: req.t('title_login'), error: true, next });
+});
+
+router.post('/logout', (req, res) => {
+  clearSessionCookie(res, req);
+  res.redirect('/');
+});
+
+// --- Profile (own account) -------------------------------------------------
+router.get('/profile', requireAuth, (req, res) => {
+  res.render('profile', {
+    title: req.t('profile_title'),
+    profileUser: req.user,
+    saved: req.query.saved === '1',
+    error: req.query.error || '',
+  });
+});
+
+router.post('/profile', requireAuth, (req, res) => {
+  updateProfile(req.user.id, { display_name: req.body.display_name, avatar: req.body.avatar });
+
+  // Optional password change: only when a new password was entered.
+  const newPass = String(req.body.new_password || '');
+  if (newPass) {
+    if (!verifyPassword(getUserById(req.user.id), req.body.current_password)) {
+      return res.redirect('/profile?error=current');
+    }
+    if (newPass !== String(req.body.confirm_password || '')) {
+      return res.redirect('/profile?error=mismatch');
+    }
+    const r = changePassword(req.user.id, newPass);
+    if (r.error) return res.redirect(`/profile?error=${r.error}`);
+    // Password change invalidates the old cookie signature -> refresh it.
+    setSessionCookie(res, req, getUserById(req.user.id));
+  }
+  res.redirect('/profile?saved=1');
+});
+
+// --- Settings (appearance + user management) -------------------------------
+router.get('/settings', requireAuth, (req, res) => {
+  res.render('settings', {
+    title: req.t('settings_title'),
+    users: listUsers(),
+    error: req.query.error || '',
+    created: req.query.created || '',
+  });
+});
+
+router.post('/settings/users', requireAuth, (req, res) => {
+  const r = createUser({
+    username: req.body.username,
+    password: req.body.password,
+    display_name: req.body.display_name,
+  });
+  if (r.error) return res.redirect(`/settings?error=${encodeURIComponent(r.error)}`);
+  res.redirect(`/settings?created=${encodeURIComponent(r.user.username)}`);
+});
+
+router.post('/settings/users/:id/delete', requireAuth, (req, res) => {
+  const r = deleteUser(Number(req.params.id));
+  if (r.error) return res.redirect(`/settings?error=${encodeURIComponent(r.error)}`);
+  // If you deleted your own account, the session is now invalid.
+  res.redirect(Number(req.params.id) === req.user.id ? '/' : '/settings');
+});
+
 // --- New recipe ------------------------------------------------------------
-router.get('/new', (req, res) => {
+router.get('/new', requireAuth, (req, res) => {
   res.render('recipe-form', {
     title: req.t('new_recipe'),
     mode: 'create',
@@ -76,13 +182,17 @@ router.get('/new', (req, res) => {
   });
 });
 
-router.post('/recipe', (req, res) => {
-  const slug = createRecipe(normalizeRecipeBody(req.body));
+router.post('/recipe', requireAuth, (req, res) => {
+  const slug = createRecipe({
+    ...normalizeRecipeBody(req.body),
+    author_id: req.user.id,
+    author_name: req.user.display_name || req.user.username,
+  });
   res.redirect(`/recipe/${slug}`);
 });
 
 // --- Edit recipe -----------------------------------------------------------
-router.get('/recipe/:slug/edit', (req, res) => {
+router.get('/recipe/:slug/edit', requireAuth, (req, res) => {
   const recipe = getRecipeBySlug(req.params.slug);
   if (!recipe) return res.status(404).render('404', { title: req.t('title_not_found') });
   res.render('recipe-form', {
@@ -94,14 +204,14 @@ router.get('/recipe/:slug/edit', (req, res) => {
   });
 });
 
-router.post('/recipe/:slug', (req, res) => {
+router.post('/recipe/:slug', requireAuth, (req, res) => {
   const recipe = getRecipeBySlug(req.params.slug);
   if (!recipe) return res.status(404).render('404', { title: req.t('title_not_found') });
   const slug = updateRecipe(recipe.id, normalizeRecipeBody(req.body));
   res.redirect(`/recipe/${slug}`);
 });
 
-router.post('/recipe/:slug/delete', (req, res) => {
+router.post('/recipe/:slug/delete', requireAuth, (req, res) => {
   const recipe = getRecipeBySlug(req.params.slug);
   if (recipe) deleteRecipe(recipe.id);
   res.redirect('/');
@@ -121,9 +231,12 @@ router.get('/recipe/:slug', (req, res) => {
     ing.status = status;
   }
 
+  const author = recipe.author_id ? publicUser(getUserById(recipe.author_id)) : null;
+
   res.render('recipe', {
     title: recipe.title,
     recipe,
+    author,
     // safe to embed inside a <script> tag
     pantryJson: JSON.stringify(pantry).replace(/</g, '\\u003c'),
   });
@@ -137,7 +250,7 @@ router.get('/pantry', (req, res) => {
   });
 });
 
-router.post('/pantry', (req, res) => {
+router.post('/pantry', requireAuth, (req, res) => {
   upsertPantry({
     name: req.body.name,
     amount: req.body.amount,
@@ -146,7 +259,7 @@ router.post('/pantry', (req, res) => {
   res.redirect('/pantry');
 });
 
-router.post('/pantry/:id/delete', (req, res) => {
+router.post('/pantry/:id/delete', requireAuth, (req, res) => {
   deletePantry(req.params.id);
   res.redirect('/pantry');
 });

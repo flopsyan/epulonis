@@ -1,0 +1,59 @@
+<%- include('partials/header') %>
+
+<div class="page-head">
+  <h1><%= t('profile_title') %></h1>
+  <p class="page-sub"><%= t('profile_sub') %></p>
+</div>
+
+<% if (saved) { %><div class="flash ok"><%= t('saved') %></div><% } %>
+<% if (error) { %><div class="flash err"><%= t('err_' + error) %></div><% } %>
+
+<form method="post" action="/profile" class="form-card profile-form" id="profile-form" autocomplete="off">
+  <div class="avatar-edit">
+    <div class="avatar-preview" id="avatar-preview">
+      <%- include('partials/avatar', { avatarUser: profileUser, avatarClass: 'avatar-lg' }) %>
+    </div>
+    <div class="avatar-edit-actions">
+      <input type="file" id="avatar-file" accept="image/*" hidden />
+      <button type="button" class="btn btn-ghost btn-sm" id="avatar-pick"><%= t('avatar_pick') %></button>
+      <button type="button" class="btn btn-ghost btn-sm" id="avatar-clear" <%= profileUser.avatar ? '' : 'hidden' %>><%= t('avatar_remove') %></button>
+      <p class="hint"><%= t('avatar_hint') %></p>
+    </div>
+    <input type="hidden" name="avatar" id="avatar-data" value="<%= profileUser.avatar %>" />
+  </div>
+
+  <div class="field">
+    <label for="username-display"><%= t('login_user') %></label>
+    <input type="text" id="username-display" value="@<%= profileUser.username %>" disabled />
+    <p class="hint"><%= t('username_locked') %></p>
+  </div>
+
+  <div class="field">
+    <label for="display_name"><%= t('display_name') %></label>
+    <input type="text" id="display_name" name="display_name" value="<%= profileUser.display_name %>" placeholder="<%= profileUser.username %>" />
+  </div>
+
+  <h2 class="form-section-title"><%= t('change_password') %></h2>
+  <div class="field">
+    <label for="current_password"><%= t('current_password') %></label>
+    <input type="password" id="current_password" name="current_password" autocomplete="current-password" />
+  </div>
+  <div class="grid-2">
+    <div class="field">
+      <label for="new_password"><%= t('new_password') %></label>
+      <input type="password" id="new_password" name="new_password" autocomplete="new-password" />
+    </div>
+    <div class="field">
+      <label for="confirm_password"><%= t('confirm_password') %></label>
+      <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" />
+    </div>
+  </div>
+  <p class="hint"><%= t('password_optional') %></p>
+
+  <div class="form-actions">
+    <a class="btn btn-ghost" href="/"><%= t('cancel') %></a>
+    <button type="submit" class="btn btn-primary"><%= t('save') %></button>
+  </div>
+</form>
+
+<%- include('partials/footer', { pageScript: 'profile.js' }) %>

@@ -8,7 +8,9 @@
         <span class="footer-links">
           <a href="/"><%= t('footer_all') %></a>
           <a href="/pantry"><%= t('footer_pantry') %></a>
-          <a href="/new"><%= t('footer_add') %></a>
+          <% if (locals.authed) { %>
+            <a href="/new"><%= t('footer_add') %></a>
+          <% } %>
         </span>
 
         <div class="switch lang-switch" role="group" aria-label="<%= t('lang_aria') %>">
@@ -29,6 +31,7 @@
   <script type="module" src="/static/js/lang.js?v=<%= assetVersion %>"></script>
   <script type="module" src="/static/js/theme.js?v=<%= assetVersion %>"></script>
   <script type="module" src="/static/js/search.js?v=<%= assetVersion %>"></script>
+  <script type="module" src="/static/js/header-menu.js?v=<%= assetVersion %>"></script>
   <% if (typeof pageScript !== 'undefined' && pageScript) { %>
     <script type="module" src="/static/js/<%= pageScript %>?v=<%= assetVersion %>"></script>
   <% } %>

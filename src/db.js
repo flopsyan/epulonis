@@ -20,6 +20,17 @@ db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    username      TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    display_name  TEXT NOT NULL DEFAULT '',
+    pass_hash     TEXT NOT NULL,
+    pass_salt     TEXT NOT NULL,
+    avatar        TEXT NOT NULL DEFAULT '',
+    created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS recipes (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     slug          TEXT NOT NULL UNIQUE,
@@ -32,6 +43,8 @@ db.exec(`
     cook_time     INTEGER NOT NULL DEFAULT 0,
     difficulty    TEXT NOT NULL DEFAULT 'Medium',
     notes         TEXT NOT NULL DEFAULT '',
+    author_id     INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    author_name   TEXT NOT NULL DEFAULT '',
     created_at    TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -81,6 +94,32 @@ db.exec(`
     value TEXT
   );
 `);
+
+// --- Migrations for databases created before a column existed ---------------
+function hasColumn(table, column) {
+  return db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === column);
+}
+if (!hasColumn('recipes', 'author_id')) {
+  // ALTER ... ADD COLUMN can't reliably carry a foreign key across SQLite
+  // versions; deleteUser() nulls authored recipes explicitly instead.
+  db.exec('ALTER TABLE recipes ADD COLUMN author_id INTEGER');
+}
+if (!hasColumn('recipes', 'author_name')) {
+  // Snapshot of the author's name, taken when the recipe is created. It
+  // survives account deletion so a recipe can still show a creator label
+  // ("deleted user") instead of a blank once the account is gone.
+  db.exec("ALTER TABLE recipes ADD COLUMN author_name TEXT NOT NULL DEFAULT ''");
+  // Backfill the snapshot for recipes that already have a live author.
+  db.exec(`
+    UPDATE recipes
+       SET author_name = COALESCE(
+         (SELECT NULLIF(display_name, '') FROM users WHERE users.id = recipes.author_id),
+         (SELECT username FROM users WHERE users.id = recipes.author_id),
+         ''
+       )
+     WHERE author_id IS NOT NULL
+  `);
+}
 
 export function getMeta(key) {
   const row = db.prepare('SELECT value FROM meta WHERE key = ?').get(key);
