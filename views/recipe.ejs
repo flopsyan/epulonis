@@ -1,0 +1,132 @@
+<%- include('partials/header') %>
+
+<%
+  // Anfangs-Darstellung der Vorrats-Pille (JS rechnet live nach).
+  function pill(status) {
+    switch (status) {
+      case 'ok':        return { cls: 'ok',      icon: '✓', label: 'vorhanden' };
+      case 'available': return { cls: 'ok',      icon: '✓', label: 'vorhanden' };
+      case 'low':       return { cls: 'low',     icon: '≈', label: 'zu wenig' };
+      case 'unknown':   return { cls: 'unknown', icon: '•', label: 'vorhanden' };
+      default:          return { cls: 'missing', icon: '✕', label: 'fehlt' };
+    }
+  }
+  const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
+%>
+
+<p class="breadcrumb"><a href="/">← Alle Rezepte</a></p>
+
+<article class="recipe" data-base-servings="<%= recipe.servings %>">
+  <div class="recipe-hero">
+    <span class="card-fallback" aria-hidden="true"><%= recipe.title.trim().charAt(0).toUpperCase() %></span>
+    <% if (recipe.image_url) { %>
+      <img src="<%= recipe.image_url %>" alt="<%= recipe.title %>" onerror="this.remove()" />
+    <% } %>
+  </div>
+
+  <header class="recipe-head">
+    <% if (recipe.tags && recipe.tags.length) { %>
+      <div class="chips">
+        <% recipe.tags.forEach((t) => { %>
+          <a class="chip" href="/?tag=<%= t.slug %>"><%= t.name %></a>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <h1><%= recipe.title %></h1>
+    <% if (recipe.description) { %><p class="lead"><%= recipe.description %></p><% } %>
+
+    <div class="badges">
+      <% if (formatTime(recipe.prep_time)) { %>
+        <div class="badge"><span class="badge-ico">⏱</span><span><span class="badge-k">Vorbereitung</span><span class="badge-v"><%= formatTime(recipe.prep_time) %></span></span></div>
+      <% } %>
+      <% if (formatTime(recipe.cook_time)) { %>
+        <div class="badge"><span class="badge-ico">🔥</span><span><span class="badge-k">Kochzeit</span><span class="badge-v"><%= formatTime(recipe.cook_time) %></span></span></div>
+      <% } %>
+      <% if (formatTime(totalTime)) { %>
+        <div class="badge"><span class="badge-ico">⏲</span><span><span class="badge-k">Gesamt</span><span class="badge-v"><%= formatTime(totalTime) %></span></span></div>
+      <% } %>
+      <div class="badge"><span class="badge-ico">📊</span><span><span class="badge-k">Schwierigkeit</span><span class="badge-v"><%= recipe.difficulty %></span></span></div>
+    </div>
+
+    <div class="recipe-actions">
+      <a class="btn btn-ghost" href="/rezept/<%= recipe.slug %>/bearbeiten">✎ Bearbeiten</a>
+      <form method="post" action="/rezept/<%= recipe.slug %>/loeschen" onsubmit="return confirm('Dieses Rezept wirklich löschen?');">
+        <button type="submit" class="btn btn-danger">🗑 Löschen</button>
+      </form>
+    </div>
+  </header>
+
+  <div class="recipe-layout">
+    <aside class="ingredients card">
+      <div class="ing-head">
+        <h2>Zutaten</h2>
+        <div class="servings-stepper" role="group" aria-label="Portionen anpassen">
+          <button type="button" class="step-btn" data-step="-1" aria-label="weniger">−</button>
+          <label class="servings-field">
+            <input type="number" id="servings-input" min="1" step="1"
+                   value="<%= formatAmount(recipe.servings) %>" aria-label="Portionen" />
+            <span class="servings-unit" id="servings-unit"><%= recipe.servings_unit %></span>
+          </label>
+          <button type="button" class="step-btn" data-step="1" aria-label="mehr">+</button>
+        </div>
+      </div>
+
+      <p class="pantry-hint">
+        Live-Abgleich mit deinem <a href="/vorrat">Vorrat</a>.
+      </p>
+
+      <ul class="ingredient-list">
+        <% recipe.ingredients.forEach((ing) => { %>
+          <% const p = pill(ing.status); %>
+          <li class="ingredient"
+              data-name="<%= ing.name %>"
+              data-base-amount="<%= ing.amount === null ? '' : ing.amount %>"
+              data-unit="<%= ing.unit %>">
+            <span class="ing-amount">
+              <span class="amount"><%= ing.amount === null ? '' : formatAmount(ing.amount) %></span>
+              <span class="unit"><%= ing.unit %></span>
+            </span>
+            <span class="ing-name">
+              <%= ing.name %><% if (ing.note) { %><span class="ing-note"><%= ing.note %></span><% } %>
+            </span>
+            <span class="pantry-pill <%= p.cls %>"><span class="pill-ico"><%= p.icon %></span><span class="pill-label"><%= p.label %></span></span>
+          </li>
+        <% }) %>
+      </ul>
+
+      <div class="pantry-legend">
+        <span><i class="dot ok"></i> vorhanden</span>
+        <span><i class="dot low"></i> zu wenig</span>
+        <span><i class="dot missing"></i> fehlt</span>
+      </div>
+    </aside>
+
+    <section class="method">
+      <% if (recipe.notes) { %>
+        <div class="notes-box">
+          <span class="notes-ico">📌</span>
+          <div>
+            <strong>Notiz</strong>
+            <p><%= recipe.notes %></p>
+          </div>
+        </div>
+      <% } %>
+
+      <h2>Zubereitung</h2>
+      <% if (recipe.steps.length) { %>
+        <ol class="step-list">
+          <% recipe.steps.forEach((s) => { %>
+            <li><span class="step-text"><%= s.text %></span></li>
+          <% }) %>
+        </ol>
+      <% } else { %>
+        <p class="muted">Für dieses Rezept sind noch keine Zubereitungsschritte hinterlegt.</p>
+      <% } %>
+    </section>
+  </div>
+</article>
+
+<script type="application/json" id="pantry-data"><%- pantryJson %></script>
+
+<%- include('partials/footer', { pageScript: 'recipe.js' }) %>

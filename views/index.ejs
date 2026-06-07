@@ -1,0 +1,56 @@
+<%- include('partials/header') %>
+
+<% if (isSearch) { %>
+  <div class="page-head">
+    <h1>Suchergebnisse</h1>
+    <p class="page-sub">
+      <%= recipes.length %> Treffer für „<strong><%= query %></strong>“ ·
+      <a href="/">zurück zur Übersicht</a>
+    </p>
+  </div>
+<% } else { %>
+  <div class="page-head">
+    <h1><%= activeTag ? activeTag.name : 'Alle Rezepte' %></h1>
+    <p class="page-sub">
+      <% if (activeTag) { %>
+        Rezepte mit dem Tag „<strong><%= activeTag.name %></strong>“ · <a href="/">alle anzeigen</a>
+      <% } else { %>
+        <%= recipes.length %> <%= recipes.length === 1 ? 'Rezept' : 'Rezepte' %> in deiner Sammlung
+      <% } %>
+    </p>
+  </div>
+
+  <% if (tags && tags.length) { %>
+    <nav class="filter-bar" aria-label="Nach Tags filtern">
+      <a class="chip <%= !activeTag ? 'active' : '' %>" href="/">Alle</a>
+      <% tags.forEach((t) => { %>
+        <a class="chip <%= activeTag && activeTag.slug === t.slug ? 'active' : '' %>" href="/?tag=<%= t.slug %>">
+          <%= t.name %> <span class="chip-count"><%= t.count %></span>
+        </a>
+      <% }) %>
+    </nav>
+  <% } %>
+<% } %>
+
+<% if (recipes.length === 0) { %>
+  <div class="empty-state">
+    <div class="empty-emoji">🍳</div>
+    <% if (isSearch) { %>
+      <h2>Keine Treffer</h2>
+      <p>Für „<%= query %>“ wurde nichts gefunden – weder im Titel noch im Rezepttext.</p>
+      <a class="btn btn-primary" href="/">Alle Rezepte ansehen</a>
+    <% } else { %>
+      <h2>Noch keine Rezepte</h2>
+      <p>Lege dein erstes Rezept an – Zutaten, Schritte und Notizen inklusive.</p>
+      <a class="btn btn-primary" href="/neu">+ Erstes Rezept anlegen</a>
+    <% } %>
+  </div>
+<% } else { %>
+  <div class="recipe-grid">
+    <% recipes.forEach((recipe) => { %>
+      <%- include('partials/recipe-card', { recipe }) %>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

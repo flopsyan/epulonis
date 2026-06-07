@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= (typeof title !== 'undefined' && title) ? title + ' · ' + siteName : siteName %></title>
+  <meta name="description" content="Selbstgehostete Rezeptplattform – Rezepte sammeln, suchen, Portionen skalieren und mit dem eigenen Vorrat abgleichen." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%B2%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">🍲</span>
+        <span class="brand-name"><%= siteName %></span>
+      </a>
+
+      <form class="search" action="/" method="get" role="search" autocomplete="off">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input
+          type="search"
+          name="q"
+          id="search-input"
+          placeholder="Rezepte durchsuchen …"
+          value="<%= searchQuery %>"
+          aria-label="Rezepte durchsuchen"
+        />
+        <div class="search-results" id="search-results" role="listbox" hidden></div>
+      </form>
+
+      <nav class="nav">
+        <a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>">Rezepte</a>
+        <a href="/vorrat" class="nav-link <%= currentPath.startsWith('/vorrat') ? 'active' : '' %>">Vorrat</a>
+        <a href="/neu" class="btn btn-primary nav-new">+ Neues&nbsp;Rezept</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main">

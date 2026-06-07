@@ -1,0 +1,217 @@
+import db from '../db.js';
+import { uniqueSlug } from '../lib/slug.js';
+import { setRecipeTags, tagsForRecipeIds } from './tags.js';
+
+const DIFFICULTIES = ['Einfach', 'Mittel', 'Schwer'];
+
+function parseAmount(v) {
+  if (v == null) return null;
+  const s = String(v).trim().replace(',', '.');
+  if (s === '') return null;
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+function parseIntOr(v, fallback = 0) {
+  const n = parseInt(String(v ?? '').trim(), 10);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+// Wandelt rohe Formulardaten in ein sauberes Rezept-Objekt.
+function sanitize(data) {
+  const servings = parseAmount(data.servings);
+  return {
+    title: String(data.title || '').trim() || 'Unbenanntes Rezept',
+    description: String(data.description || '').trim(),
+    image_url: String(data.image_url || '').trim(),
+    servings: servings && servings > 0 ? servings : 4,
+    servings_unit: String(data.servings_unit || '').trim() || 'Portionen',
+    prep_time: parseIntOr(data.prep_time, 0),
+    cook_time: parseIntOr(data.cook_time, 0),
+    difficulty: DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'Mittel',
+    notes: String(data.notes || '').trim(),
+    tags: Array.isArray(data.tags) ? data.tags : [],
+    ingredients: (Array.isArray(data.ingredients) ? data.ingredients : [])
+      .map((i) => ({
+        amount: parseAmount(i.amount),
+        unit: String(i.unit || '').trim(),
+        name: String(i.name || '').trim(),
+        note: String(i.note || '').trim(),
+      }))
+      .filter((i) => i.name !== ''),
+    steps: (Array.isArray(data.steps) ? data.steps : [])
+      .map((s) => String(s || '').trim())
+      .filter((s) => s !== ''),
+  };
+}
+
+const insertRecipeStmt = db.prepare(`
+  INSERT INTO recipes
+    (slug, title, description, image_url, servings, servings_unit, prep_time, cook_time, difficulty, notes)
+  VALUES
+    (@slug, @title, @description, @image_url, @servings, @servings_unit, @prep_time, @cook_time, @difficulty, @notes)
+`);
+const insertIngredientStmt = db.prepare(`
+  INSERT INTO ingredients (recipe_id, position, amount, unit, name, note)
+  VALUES (?, ?, ?, ?, ?, ?)
+`);
+const insertStepStmt = db.prepare(`
+  INSERT INTO steps (recipe_id, position, text) VALUES (?, ?, ?)
+`);
+
+function writeChildren(recipeId, clean) {
+  clean.ingredients.forEach((ing, idx) =>
+    insertIngredientStmt.run(recipeId, idx, ing.amount, ing.unit, ing.name, ing.note)
+  );
+  clean.steps.forEach((text, idx) => insertStepStmt.run(recipeId, idx, text));
+  setRecipeTags(recipeId, clean.tags);
+}
+
+export const createRecipe = db.transaction((data) => {
+  const clean = sanitize(data);
+  const slug = uniqueSlug(clean.title, (s) =>
+    db.prepare('SELECT 1 FROM recipes WHERE slug = ?').get(s)
+  );
+  const info = insertRecipeStmt.run({ ...clean, slug });
+  writeChildren(info.lastInsertRowid, clean);
+  return slug;
+});
+
+export const updateRecipe = db.transaction((id, data) => {
+  const clean = sanitize(data);
+  const current = db.prepare('SELECT slug, title FROM recipes WHERE id = ?').get(id);
+  if (!current) return null;
+
+  // Slug nur neu vergeben, wenn sich der Titel geändert hat.
+  let slug = current.slug;
+  if (clean.title !== current.title) {
+    slug = uniqueSlug(clean.title, (s) =>
+      db.prepare('SELECT 1 FROM recipes WHERE slug = ? AND id != ?').get(s, id)
+    );
+  }
+
+  db.prepare(`
+    UPDATE recipes SET
+      slug=@slug, title=@title, description=@description, image_url=@image_url,
+      servings=@servings, servings_unit=@servings_unit, prep_time=@prep_time,
+      cook_time=@cook_time, difficulty=@difficulty, notes=@notes,
+      updated_at=datetime('now')
+    WHERE id=@id
+  `).run({ ...clean, slug, id });
+
+  db.prepare('DELETE FROM ingredients WHERE recipe_id = ?').run(id);
+  db.prepare('DELETE FROM steps WHERE recipe_id = ?').run(id);
+  writeChildren(id, clean);
+  return slug;
+});
+
+export function deleteRecipe(id) {
+  return db.prepare('DELETE FROM recipes WHERE id = ?').run(id);
+}
+
+function hydrate(recipe) {
+  if (!recipe) return null;
+  recipe.ingredients = db
+    .prepare('SELECT * FROM ingredients WHERE recipe_id = ? ORDER BY position, id')
+    .all(recipe.id);
+  recipe.steps = db
+    .prepare('SELECT * FROM steps WHERE recipe_id = ? ORDER BY position, id')
+    .all(recipe.id);
+  recipe.tags = tagsForRecipeIds([recipe.id]).get(recipe.id) || [];
+  return recipe;
+}
+
+export function getRecipeBySlug(slug) {
+  return hydrate(db.prepare('SELECT * FROM recipes WHERE slug = ?').get(slug));
+}
+
+export function getRecipeById(id) {
+  return hydrate(db.prepare('SELECT * FROM recipes WHERE id = ?').get(id));
+}
+
+export function countRecipes() {
+  return db.prepare('SELECT COUNT(*) AS c FROM recipes').get().c;
+}
+
+// Hängt Tags an eine Liste von Rezept-Zeilen an.
+function attachTags(rows) {
+  const map = tagsForRecipeIds(rows.map((r) => r.id));
+  for (const r of rows) r.tags = map.get(r.id) || [];
+  return rows;
+}
+
+// Überblicksliste, optional nach Tag-Slug gefiltert.
+export function listRecipes({ tagSlug } = {}) {
+  let rows;
+  if (tagSlug) {
+    rows = db
+      .prepare(
+        `SELECT r.* FROM recipes r
+         JOIN recipe_tags rt ON rt.recipe_id = r.id
+         JOIN tags t ON t.id = rt.tag_id
+         WHERE t.slug = ?
+         ORDER BY r.created_at DESC, r.id DESC`
+      )
+      .all(tagSlug);
+  } else {
+    rows = db.prepare('SELECT * FROM recipes ORDER BY created_at DESC, id DESC').all();
+  }
+  return attachTags(rows);
+}
+
+// Faltet Umlaute & Groß-/Kleinschreibung für eine tolerante Suche.
+function fold(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss');
+}
+
+// Volltextsuche mit Titel-Priorität.
+// Titeltreffer (Gewicht 100) ranken IMMER vor reinen Inhaltstreffern (max ~42),
+// d. h. "Zitrone" liefert zuerst den "Zitronenkuchen", dann Rezepte, die
+// Zitrone nur als Zutat o. Ä. enthalten.
+export function searchRecipes(query) {
+  const q = fold(query.trim());
+  if (!q) return [];
+
+  const rows = db
+    .prepare(
+      `SELECT r.*,
+         (SELECT group_concat(name, ' ')  FROM ingredients WHERE recipe_id = r.id) AS ing_text,
+         (SELECT group_concat(text, ' ')  FROM steps       WHERE recipe_id = r.id) AS step_text,
+         (SELECT group_concat(t.name, ' ') FROM recipe_tags rt
+            JOIN tags t ON t.id = rt.tag_id WHERE rt.recipe_id = r.id) AS tag_text
+       FROM recipes r`
+    )
+    .all();
+
+  const scored = [];
+  for (const r of rows) {
+    let score = 0;
+    let titleMatch = false;
+
+    const title = fold(r.title);
+    if (title.includes(q)) {
+      score += 100;
+      titleMatch = true;
+      if (title.startsWith(q)) score += 25; // exakter Wortanfang etwas höher
+    }
+    if (fold(r.description).includes(q)) score += 12;
+    if (fold(r.ing_text).includes(q)) score += 10;
+    if (fold(r.tag_text).includes(q)) score += 8;
+    if (fold(r.step_text).includes(q)) score += 7;
+    if (fold(r.notes).includes(q)) score += 5;
+
+    if (score > 0) {
+      r._score = score;
+      r._titleMatch = titleMatch;
+      scored.push(r);
+    }
+  }
+
+  scored.sort((a, b) => b._score - a._score || a.title.localeCompare(b.title, 'de'));
+  return attachTags(scored);
+}

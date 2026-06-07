@@ -1,0 +1,74 @@
+<%- include('partials/header') %>
+
+<div class="page-head">
+  <h1>Vorratskammer</h1>
+  <p class="page-sub">Trag ein, was du zu Hause hast – die Rezepte zeigen dann live an, ob eine Zutat vorhanden ist.</p>
+</div>
+
+<div class="pantry-layout">
+  <section class="form-card pantry-form-card">
+    <h2 class="form-section-title" id="pantry-form-title">Lebensmittel hinzufügen</h2>
+    <form class="pantry-form" method="post" action="/vorrat" id="pantry-form">
+      <div class="field">
+        <label for="p-name">Lebensmittel</label>
+        <input type="text" id="p-name" name="name" required placeholder="z. B. Mehl" />
+        <p class="hint">Gleicher Name wie in den Rezept-Zutaten = automatischer Abgleich.</p>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label for="p-amount">Menge</label>
+          <input type="text" id="p-amount" name="amount" inputmode="decimal" placeholder="z. B. 500" />
+        </div>
+        <div class="field">
+          <label for="p-unit">Einheit</label>
+          <input type="text" id="p-unit" name="unit" list="unit-list" placeholder="g / ml / Stück" />
+        </div>
+      </div>
+      <div class="form-actions form-actions-inline">
+        <button type="button" class="btn btn-ghost" id="pantry-reset" hidden>Neu</button>
+        <button type="submit" class="btn btn-primary" id="pantry-submit">Speichern</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="pantry-list-wrap">
+    <% if (items.length === 0) { %>
+      <div class="empty-state small">
+        <div class="empty-emoji">🧺</div>
+        <h2>Vorrat ist leer</h2>
+        <p>Füge links das erste Lebensmittel hinzu.</p>
+      </div>
+    <% } else { %>
+      <div class="pantry-count"><%= items.length %> <%= items.length === 1 ? 'Eintrag' : 'Einträge' %></div>
+      <ul class="pantry-list">
+        <% items.forEach((item) => { %>
+          <li class="pantry-item"
+              data-name="<%= item.name %>"
+              data-amount="<%= item.amount === null ? '' : formatAmount(item.amount) %>"
+              data-unit="<%= item.unit %>">
+            <span class="pantry-item-name"><%= item.name %></span>
+            <span class="pantry-item-qty">
+              <% if (item.amount !== null) { %><%= formatAmount(item.amount) %> <% } %><%= item.unit %>
+            </span>
+            <span class="pantry-item-actions">
+              <button type="button" class="icon-btn pantry-edit" title="Bearbeiten">✎</button>
+              <form method="post" action="/vorrat/<%= item.id %>/loeschen"
+                    onsubmit="return confirm('„<%= item.name %>“ aus dem Vorrat entfernen?');">
+                <button type="submit" class="icon-btn danger" title="Entfernen">🗑</button>
+              </form>
+            </span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+</div>
+
+<datalist id="unit-list">
+  <option value="g"></option><option value="kg"></option>
+  <option value="ml"></option><option value="l"></option>
+  <option value="Stück"></option><option value="Päckchen"></option>
+  <option value="Zehen"></option><option value="Dose"></option>
+</datalist>
+
+<%- include('partials/footer', { pageScript: 'pantry.js' }) %>

@@ -1,0 +1,19 @@
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>🍲 <strong><%= siteName %></strong> · deine selbstgehostete Rezeptsammlung</span>
+      <span class="footer-links">
+        <a href="/">Alle Rezepte</a>
+        <a href="/vorrat">Vorrat</a>
+        <a href="/neu">Rezept hinzufügen</a>
+      </span>
+    </div>
+  </footer>
+
+  <script type="module" src="/static/js/search.js"></script>
+  <% if (typeof pageScript !== 'undefined' && pageScript) { %>
+    <script type="module" src="/static/js/<%= pageScript %>"></script>
+  <% } %>
+</body>
+</html>

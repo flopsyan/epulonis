@@ -1,0 +1,36 @@
+<article class="card recipe-card">
+  <a class="card-media" href="/rezept/<%= recipe.slug %>">
+    <span class="card-fallback" aria-hidden="true"><%= (recipe.title || '?').trim().charAt(0).toUpperCase() %></span>
+    <% if (recipe.image_url) { %>
+      <img
+        src="<%= recipe.image_url %>"
+        alt="<%= recipe.title %>"
+        loading="lazy"
+        onerror="this.remove()"
+      />
+    <% } %>
+    <span class="card-badge"><%= recipe.difficulty %></span>
+  </a>
+
+  <div class="card-body">
+    <% if (recipe.tags && recipe.tags.length) { %>
+      <div class="chips chips-sm">
+        <% recipe.tags.slice(0, 3).forEach((t) => { %>
+          <a class="chip" href="/?tag=<%= t.slug %>"><%= t.name %></a>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <h3 class="card-title"><a href="/rezept/<%= recipe.slug %>"><%= recipe.title %></a></h3>
+
+    <% if (recipe.description) { %>
+      <p class="card-desc"><%= recipe.description %></p>
+    <% } %>
+
+    <div class="card-meta">
+      <% const total = (recipe.prep_time || 0) + (recipe.cook_time || 0); %>
+      <% if (formatTime(total)) { %><span title="Gesamtzeit">⏱ <%= formatTime(total) %></span><% } %>
+      <span title="Portionen">🍽 <%= formatAmount(recipe.servings) %> <%= recipe.servings_unit %></span>
+    </div>
+  </div>
+</article>

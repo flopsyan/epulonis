@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Laufzeitdaten / Datenbank (persistente Nutzerdaten gehören nicht ins Repo)
+data/
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+
+# Umgebungsvariablen
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,26 @@
+services:
+  rezeptplattform:
+    build: .
+    image: rezeptplattform:latest
+    container_name: rezeptplattform
+    restart: unless-stopped
+    ports:
+      # Host-Port ist über die .env (PORT) anpassbar, Standard 3000
+      - "${PORT:-3000}:3000"
+    environment:
+      SITE_NAME: ${SITE_NAME:-Rezeptbuch}
+      # Beispieldaten beim allerersten Start einspielen (true/false)
+      SEED_DEMO: ${SEED_DEMO:-true}
+      NODE_ENV: production
+    volumes:
+      # Persistente Daten (SQLite-Datenbank). Named Volume = übersteht Updates.
+      - rezept-daten:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  rezept-daten:

@@ -1,0 +1,142 @@
+<%- include('partials/header') %>
+
+<p class="breadcrumb"><a href="/">← Alle Rezepte</a></p>
+
+<div class="page-head">
+  <h1><%= mode === 'edit' ? 'Rezept bearbeiten' : 'Neues Rezept' %></h1>
+  <p class="page-sub">Alle Felder außer dem Titel sind optional – du kannst so viel oder so wenig hinterlegen, wie du möchtest.</p>
+</div>
+
+<form class="recipe-form" method="post" action="<%= formAction %>">
+  <section class="form-card">
+    <h2 class="form-section-title">Grunddaten</h2>
+
+    <div class="field">
+      <label for="title">Titel <span class="req">*</span></label>
+      <input type="text" id="title" name="title" required maxlength="200"
+             placeholder="z. B. Saftiger Zitronenkuchen" value="<%= recipe.title %>" />
+    </div>
+
+    <div class="field">
+      <label for="description">Kurzbeschreibung</label>
+      <textarea id="description" name="description" rows="2"
+                placeholder="Ein, zwei Sätze, worum es geht …"><%= recipe.description %></textarea>
+    </div>
+
+    <div class="field">
+      <label for="image_url">Bild-URL</label>
+      <input type="url" id="image_url" name="image_url" placeholder="https://…/bild.jpg"
+             value="<%= recipe.image_url %>" />
+      <p class="hint">Link zu einem Bild aus dem Internet. Leer lassen für ein automatisches Platzhalter-Motiv.</p>
+      <div class="image-preview" id="image-preview" <%= recipe.image_url ? '' : 'hidden' %>>
+        <img id="image-preview-img" src="<%= recipe.image_url %>" alt="Vorschau" onerror="this.closest('.image-preview').setAttribute('hidden','')" />
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="servings">Portionen</label>
+        <input type="number" id="servings" name="servings" min="1" step="0.5"
+               value="<%= recipe.servings %>" />
+      </div>
+      <div class="field">
+        <label for="servings_unit">Einheit der Portion</label>
+        <input type="text" id="servings_unit" name="servings_unit"
+               placeholder="Portionen / Stücke / Gläser …" value="<%= recipe.servings_unit %>" />
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="field">
+        <label for="prep_time">Vorbereitung (Min.)</label>
+        <input type="number" id="prep_time" name="prep_time" min="0" step="1"
+               value="<%= recipe.prep_time %>" />
+      </div>
+      <div class="field">
+        <label for="cook_time">Kochzeit (Min.)</label>
+        <input type="number" id="cook_time" name="cook_time" min="0" step="1"
+               value="<%= recipe.cook_time %>" />
+      </div>
+      <div class="field">
+        <label for="difficulty">Schwierigkeit</label>
+        <select id="difficulty" name="difficulty">
+          <% difficulties.forEach((d) => { %>
+            <option value="<%= d %>" <%= recipe.difficulty === d ? 'selected' : '' %>><%= d %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="tags">Tags</label>
+      <input type="text" id="tags" name="tags"
+             placeholder="Kuchen, Dessert, Vegetarisch …"
+             value="<%= (recipe.tags || []).map((t) => t.name || t).join(', ') %>" />
+      <p class="hint">Mit Komma getrennt. Tags dienen als Filter auf der Übersichtsseite.</p>
+    </div>
+  </section>
+
+  <section class="form-card">
+    <div class="form-section-head">
+      <h2 class="form-section-title">Zutaten</h2>
+      <button type="button" class="btn btn-ghost btn-sm" id="add-ingredient">+ Zutat</button>
+    </div>
+    <p class="hint">Menge und Einheit sind optional (z. B. „Salz, nach Geschmack“). Die Menge skaliert später automatisch mit den Portionen.</p>
+
+    <div class="rows ingredient-rows" id="ingredient-rows">
+      <% recipe.ingredients.forEach((ing) => { %>
+        <div class="row ingredient-row">
+          <input class="cell-amount" data-field="amount" inputmode="decimal" placeholder="Menge"
+                 value="<%= ing.amount === null || ing.amount === undefined ? '' : formatAmount(ing.amount) %>" />
+          <input class="cell-unit" data-field="unit" placeholder="Einheit" list="unit-list" value="<%= ing.unit %>" />
+          <input class="cell-name" data-field="name" placeholder="Zutat" value="<%= ing.name %>" />
+          <input class="cell-note" data-field="note" placeholder="Notiz (optional)" value="<%= ing.note %>" />
+          <button type="button" class="row-remove" aria-label="Zutat entfernen">✕</button>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="form-card">
+    <div class="form-section-head">
+      <h2 class="form-section-title">Zubereitung</h2>
+      <button type="button" class="btn btn-ghost btn-sm" id="add-step">+ Schritt</button>
+    </div>
+
+    <div class="rows step-rows" id="step-rows">
+      <% recipe.steps.forEach((s) => { %>
+        <div class="row step-row">
+          <span class="step-num"></span>
+          <textarea data-field="step" name="steps[]" rows="2" placeholder="Schritt beschreiben …"><%= s.text || s %></textarea>
+          <button type="button" class="row-remove" aria-label="Schritt entfernen">✕</button>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="form-card">
+    <h2 class="form-section-title">Notizen</h2>
+    <div class="field">
+      <label for="notes" class="sr-only">Notizen</label>
+      <textarea id="notes" name="notes" rows="3"
+                placeholder="z. B. Hähnchenbrust am Vortag in den Kühlschrank legen …"><%= recipe.notes %></textarea>
+    </div>
+  </section>
+
+  <div class="form-actions">
+    <a class="btn btn-ghost" href="<%= mode === 'edit' ? '/rezept/' + recipe.slug : '/' %>">Abbrechen</a>
+    <button type="submit" class="btn btn-primary"><%= mode === 'edit' ? 'Änderungen speichern' : 'Rezept speichern' %></button>
+  </div>
+</form>
+
+<datalist id="unit-list">
+  <option value="g"></option><option value="kg"></option>
+  <option value="ml"></option><option value="l"></option>
+  <option value="Stück"></option><option value="EL"></option>
+  <option value="TL"></option><option value="Prise"></option>
+  <option value="Päckchen"></option><option value="Zehen"></option>
+  <option value="Bund"></option><option value="Dose"></option>
+  <option value="Becher"></option><option value="Scheibe"></option>
+</datalist>
+
+<%- include('partials/footer', { pageScript: 'form.js' }) %>

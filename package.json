@@ -1,0 +1,20 @@
+{
+  "name": "rezeptplattform",
+  "version": "1.0.0",
+  "description": "Selbstgehostete Rezeptplattform – Rezepte verwalten, durchsuchen, Portionen skalieren und mit dem eigenen Vorrat abgleichen.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/seed.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1"
+  }
+}
