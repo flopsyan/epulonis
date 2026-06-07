@@ -7,7 +7,7 @@ import { seedDemo } from './seed.js';
 import pagesRouter from './routes/pages.js';
 import apiRouter from './routes/api.js';
 import { formatAmount, formatTime } from './lib/format.js';
-import { langFromCookie, makeT, clientStrings } from './lib/i18n.js';
+import { langFromRequest, makeT, clientStrings } from './lib/i18n.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
@@ -38,7 +38,7 @@ app.use(
 
 // Language (from cookie), translations, navigation & search box for all views
 app.use((req, res, next) => {
-  const lang = langFromCookie(req.headers.cookie);
+  const lang = langFromRequest(req);
   req.lang = lang;
   req.t = makeT(lang);
   res.locals.lang = lang;

@@ -287,15 +287,29 @@ export function pickLang(value) {
 }
 
 // Reads the language from the raw Cookie header (no extra dependency).
-export function langFromCookie(cookieHeader) {
-  if (!cookieHeader) return DEFAULT_LANG;
+// Returns null if no explicit choice was stored, so the caller can fall back
+// to the browser's Accept-Language header.
+function langFromCookie(cookieHeader) {
+  if (!cookieHeader) return null;
   for (const part of cookieHeader.split(';')) {
     const idx = part.indexOf('=');
     if (idx === -1) continue;
     const key = part.slice(0, idx).trim();
     if (key === 'epulonis-lang') return pickLang(decodeURIComponent(part.slice(idx + 1).trim()));
   }
-  return DEFAULT_LANG;
+  return null;
+}
+
+// Without an explicit cookie, fall back to the browser's system language:
+// German for "de…" Accept-Language values, English otherwise.
+function langFromAcceptHeader(acceptLanguage) {
+  return acceptLanguage && /^\s*de\b/i.test(acceptLanguage) ? 'de' : DEFAULT_LANG;
+}
+
+// Determines the UI language for a request: explicit cookie choice wins,
+// otherwise the system/browser language is detected from Accept-Language.
+export function langFromRequest(req) {
+  return langFromCookie(req.headers.cookie) ?? langFromAcceptHeader(req.headers['accept-language']);
 }
 
 export function makeT(lang) {
