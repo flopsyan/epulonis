@@ -39,7 +39,7 @@ recipes – with a servings calculator and a live match against your own pantry.
 Requirements: Docker and Docker Compose.
 
 ```bash
-git clone git@github.com:flopsyan/epulonis.git
+git clone https://github.com/flopsyan/epulonis.git
 cd epulonis
 
 # optional: adjust settings
