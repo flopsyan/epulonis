@@ -13,11 +13,11 @@
       <input type="hidden" name="next" value="<%= next %>" />
       <div class="field">
         <label for="login-user"><%= t('login_user') %></label>
-        <input type="text" id="login-user" name="username" autocomplete="username" required />
+        <input type="text" id="login-user" name="username" autocomplete="username" required autofocus />
       </div>
       <div class="field">
         <label for="login-pass"><%= t('login_password') %></label>
-        <input type="password" id="login-pass" name="password" autocomplete="current-password" required autofocus />
+        <input type="password" id="login-pass" name="password" autocomplete="current-password" required />
       </div>
       <div class="form-actions">
         <a class="btn btn-ghost" href="/"><%= t('cancel') %></a>
