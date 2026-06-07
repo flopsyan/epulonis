@@ -142,23 +142,46 @@ function attachTags(rows) {
   return rows;
 }
 
-// Overview list, optionally filtered by tag slug.
-export function listRecipes({ tagSlug } = {}) {
-  let rows;
+// Overview list, optionally filtered by tag slug and/or author (owner) id.
+// Both filters combine (AND), so "Desserts by Anna" works.
+export function listRecipes({ tagSlug, authorId } = {}) {
+  const where = [];
+  const params = [];
+  let join = '';
   if (tagSlug) {
-    rows = db
-      .prepare(
-        `SELECT r.* FROM recipes r
-         JOIN recipe_tags rt ON rt.recipe_id = r.id
-         JOIN tags t ON t.id = rt.tag_id
-         WHERE t.slug = ?
-         ORDER BY r.created_at DESC, r.id DESC`
-      )
-      .all(tagSlug);
-  } else {
-    rows = db.prepare('SELECT * FROM recipes ORDER BY created_at DESC, id DESC').all();
+    join = `JOIN recipe_tags rt ON rt.recipe_id = r.id
+         JOIN tags t ON t.id = rt.tag_id`;
+    where.push('t.slug = ?');
+    params.push(tagSlug);
   }
+  if (authorId) {
+    where.push('r.author_id = ?');
+    params.push(authorId);
+  }
+  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+  const rows = db
+    .prepare(
+      `SELECT r.* FROM recipes r
+       ${join}
+       ${whereSql}
+       ORDER BY r.created_at DESC, r.id DESC`
+    )
+    .all(...params);
   return attachTags(rows);
+}
+
+// Recipe owners (users who authored at least one recipe) with their counts,
+// for the owner filter on the overview.
+export function authorsWithCounts() {
+  return db
+    .prepare(
+      `SELECT u.id, u.username, u.display_name, u.avatar, COUNT(r.id) AS count
+       FROM users u
+       JOIN recipes r ON r.author_id = u.id
+       GROUP BY u.id
+       ORDER BY count DESC, u.username COLLATE NOCASE ASC`
+    )
+    .all();
 }
 
 // Folds case for a tolerant search.

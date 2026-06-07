@@ -236,6 +236,7 @@ img { max-width: 100%; display: block; }
 .chip.active { background: var(--primary); color: #fff; }
 .chip-count { font-size: .75rem; opacity: .7; }
 .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+.filter-label { align-self: center; font-size: .82rem; color: var(--muted); margin-right: 2px; }
 
 /* ---------- Recipe grid / cards ---------- */
 .recipe-grid {

@@ -10,11 +10,25 @@
     </p>
   </div>
 <% } else { %>
+  <%
+    // Build an overview URL, preserving the other active filter dimension so the
+    // tag and owner filters combine ("Desserts by Anna").
+    function filterUrl(opts) {
+      const p = new URLSearchParams();
+      if (opts.tag) p.set('tag', opts.tag);
+      if (opts.author) p.set('author', opts.author);
+      const qs = p.toString();
+      return qs ? `/?${qs}` : '/';
+    }
+    const curTag = activeTag ? activeTag.slug : null;
+    const curAuthor = activeAuthor ? activeAuthor.id : null;
+  %>
   <div class="page-head">
-    <h1><%= activeTag ? activeTag.name : t('all_recipes') %></h1>
+    <h1><% if (activeTag) { %><%= activeTag.name %><% } else if (activeAuthor) { %><%= t('recipes_by') %> <%= activeAuthor.display_name || activeAuthor.username %><% } else { %><%= t('all_recipes') %><% } %></h1>
     <p class="page-sub">
-      <% if (activeTag) { %>
-        <%= t('tagged_with') %> „<strong><%= activeTag.name %></strong>“ · <a href="/"><%= t('show_all') %></a>
+      <% if (activeTag || activeAuthor) { %>
+        <%= recipes.length %> <%= recipes.length === 1 ? t('recipe_one') : t('recipe_many') %> ·
+        <a href="<%= filterUrl({}) %>"><%= t('show_all') %></a>
       <% } else { %>
         <%= recipes.length %> <%= recipes.length === 1 ? t('recipe_one') : t('recipe_many') %> <%= t('in_collection') %>
       <% } %>
@@ -23,10 +37,22 @@
 
   <% if (tags && tags.length) { %>
     <nav class="filter-bar" aria-label="<%= t('filter_aria') %>">
-      <a class="chip <%= !activeTag ? 'active' : '' %>" href="/"><%= t('chip_all') %></a>
+      <a class="chip <%= !activeTag ? 'active' : '' %>" href="<%= filterUrl({ author: curAuthor }) %>"><%= t('chip_all') %></a>
       <% tags.forEach((tag) => { %>
-        <a class="chip <%= activeTag && activeTag.slug === tag.slug ? 'active' : '' %>" href="/?tag=<%= tag.slug %>">
+        <a class="chip <%= curTag === tag.slug ? 'active' : '' %>" href="<%= filterUrl({ tag: tag.slug, author: curAuthor }) %>">
           <%= tag.name %> <span class="chip-count"><%= tag.count %></span>
+        </a>
+      <% }) %>
+    </nav>
+  <% } %>
+
+  <% if (authors && authors.length) { %>
+    <nav class="filter-bar owner-filter" aria-label="<%= t('filter_owner_aria') %>">
+      <span class="filter-label"><%= t('owner_filter') %></span>
+      <a class="chip <%= !activeAuthor ? 'active' : '' %>" href="<%= filterUrl({ tag: curTag }) %>"><%= t('chip_all') %></a>
+      <% authors.forEach((a) => { %>
+        <a class="chip <%= curAuthor === a.id ? 'active' : '' %>" href="<%= filterUrl({ tag: curTag, author: a.id }) %>">
+          <%= a.display_name || a.username %> <span class="chip-count"><%= a.count %></span>
         </a>
       <% }) %>
     </nav>

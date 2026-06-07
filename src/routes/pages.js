@@ -6,6 +6,7 @@ import {
   createRecipe,
   updateRecipe,
   deleteRecipe,
+  authorsWithCounts,
 } from '../models/recipes.js';
 import { allTagsWithCounts, getTagBySlug } from '../models/tags.js';
 import { allPantry, pantryMap, upsertPantry, deletePantry } from '../models/pantry.js';
@@ -62,23 +63,30 @@ function normalizeRecipeBody(body) {
 router.get('/', (req, res) => {
   const q = (req.query.q || '').trim();
   const tagSlug = (req.query.tag || '').trim();
+  const authorIdRaw = parseInt(req.query.author, 10);
+  const authorId = Number.isInteger(authorIdRaw) && authorIdRaw > 0 ? authorIdRaw : null;
+
+  const tags = allTagsWithCounts();
+  const authors = authorsWithCounts();
 
   let recipes;
   let activeTag = null;
+  let activeAuthor = null;
   if (q) {
     recipes = searchRecipes(q);
-  } else if (tagSlug) {
-    activeTag = getTagBySlug(tagSlug) || null;
-    recipes = listRecipes({ tagSlug });
   } else {
-    recipes = listRecipes();
+    activeTag = tagSlug ? getTagBySlug(tagSlug) || null : null;
+    activeAuthor = authorId ? authors.find((a) => a.id === authorId) || null : null;
+    recipes = listRecipes({ tagSlug: activeTag ? activeTag.slug : undefined, authorId });
   }
 
   res.render('index', {
     title: q ? `${req.t('title_search')} ${q}` : req.t('all_recipes'),
     recipes,
-    tags: allTagsWithCounts(),
+    tags,
+    authors,
     activeTag,
+    activeAuthor,
     query: q,
     isSearch: Boolean(q),
   });
