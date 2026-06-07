@@ -285,6 +285,8 @@ img { max-width: 100%; display: block; }
   display: flex; flex-wrap: wrap; gap: 14px; margin-top: auto; padding-top: 12px;
   color: var(--muted); font-size: .85rem;
 }
+.card-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.card-meta .icon { width: 1.05rem; height: 1.05rem; }
 
 /* ---------- Empty state ---------- */
 .empty-state {
@@ -316,9 +318,12 @@ img { max-width: 100%; display: block; }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 9px 15px; box-shadow: var(--shadow-sm);
 }
-.badge-ico { font-size: 1.25rem; }
+.badge-ico { display: inline-flex; align-items: center; color: var(--primary); }
+.badge-ico .icon { width: 1.3rem; height: 1.3rem; }
 .badge-k { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
 .badge-v { display: block; font-weight: 600; }
+
+.icon { width: 1.2em; height: 1.2em; flex: none; }
 
 .recipe-actions { display: flex; gap: 10px; margin-top: 20px; align-items: center; }
 .recipe-actions form { margin: 0; }

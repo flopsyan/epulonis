@@ -42,6 +42,7 @@ db.exec(`
     servings_unit TEXT NOT NULL DEFAULT 'Servings',
     prep_time     INTEGER NOT NULL DEFAULT 0,
     cook_time     INTEGER NOT NULL DEFAULT 0,
+    rest_time     INTEGER NOT NULL DEFAULT 0,
     difficulty    TEXT NOT NULL DEFAULT 'Medium',
     notes         TEXT NOT NULL DEFAULT '',
     author_id     INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -120,6 +121,12 @@ if (!hasColumn('recipes', 'author_name')) {
        )
      WHERE author_id IS NOT NULL
   `);
+}
+if (!hasColumn('recipes', 'rest_time')) {
+  // The single "cook" time was split into three fields (active / cook-or-bake /
+  // resting time). Older databases only have prep_time and cook_time; resting
+  // time starts at 0 for them.
+  db.exec('ALTER TABLE recipes ADD COLUMN rest_time INTEGER NOT NULL DEFAULT 0');
 }
 if (!hasColumn('users', 'is_admin')) {
   db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0');

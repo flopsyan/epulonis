@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <div class="grid-2">
+    <div class="grid-3">
       <div class="field">
         <label for="servings"><%= t('f_servings') %></label>
         <input type="number" id="servings" name="servings" min="1" step="0.5"
@@ -43,6 +43,14 @@
         <label for="servings_unit"><%= t('f_serving_unit') %></label>
         <input type="text" id="servings_unit" name="servings_unit"
                placeholder="<%= t('f_serving_unit_ph') %>" value="<%= recipe.servings_unit %>" />
+      </div>
+      <div class="field">
+        <label for="difficulty"><%= t('difficulty') %></label>
+        <select id="difficulty" name="difficulty">
+          <% difficulties.forEach((d) => { %>
+            <option value="<%= d %>" <%= recipe.difficulty === d ? 'selected' : '' %>><%= t('diff_' + d) %></option>
+          <% }) %>
+        </select>
       </div>
     </div>
 
@@ -58,12 +66,9 @@
                value="<%= recipe.cook_time %>" />
       </div>
       <div class="field">
-        <label for="difficulty"><%= t('difficulty') %></label>
-        <select id="difficulty" name="difficulty">
-          <% difficulties.forEach((d) => { %>
-            <option value="<%= d %>" <%= recipe.difficulty === d ? 'selected' : '' %>><%= t('diff_' + d) %></option>
-          <% }) %>
-        </select>
+        <label for="rest_time"><%= t('f_rest') %></label>
+        <input type="number" id="rest_time" name="rest_time" min="0" step="1"
+               value="<%= recipe.rest_time %>" />
       </div>
     </div>
 

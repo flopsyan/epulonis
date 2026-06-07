@@ -184,7 +184,7 @@ router.get('/new', requireAuth, (req, res) => {
     difficulties: DIFFICULTIES,
     recipe: {
       title: '', description: '', image_url: '', servings: 4,
-      servings_unit: req.t('default_serving_unit'), prep_time: '', cook_time: '',
+      servings_unit: req.t('default_serving_unit'), prep_time: '', cook_time: '', rest_time: '',
       difficulty: 'Medium', notes: '',
       ingredients: [], steps: [], tags: [],
     },

@@ -20,6 +20,7 @@ const RECIPES = [
     servings_unit: 'Slices',
     prep_time: 25,
     cook_time: 45,
+    rest_time: 15,
     difficulty: 'Easy',
     tags: ['Cake', 'Dessert', 'Baking', 'Vegetarian'],
     ingredients: [
@@ -52,6 +53,7 @@ const RECIPES = [
     servings_unit: 'Servings',
     prep_time: 10,
     cook_time: 15,
+    rest_time: 0,
     difficulty: 'Medium',
     tags: ['Pasta', 'Italian', 'Main course', 'Quick'],
     ingredients: [
@@ -84,6 +86,7 @@ const RECIPES = [
     servings_unit: 'Servings',
     prep_time: 20,
     cook_time: 35,
+    rest_time: 5,
     difficulty: 'Medium',
     tags: ['Main course', 'Meat', 'Oven'],
     ingredients: [

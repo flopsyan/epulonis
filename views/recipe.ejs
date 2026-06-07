@@ -12,7 +12,7 @@
       default:          return { cls: 'missing', icon: '✕', label: t('legend_missing') };
     }
   }
-  const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
+  const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0) + (recipe.rest_time || 0);
 %>
 
 <p class="breadcrumb"><a href="/"><%= t('back_all') %></a></p>
@@ -39,15 +39,18 @@
 
     <div class="badges">
       <% if (formatTime(recipe.prep_time)) { %>
-        <div class="badge"><span class="badge-ico">⏱</span><span><span class="badge-k"><%= t('prep') %></span><span class="badge-v"><%= formatTime(recipe.prep_time) %></span></span></div>
+        <div class="badge"><span class="badge-ico"><%- include('partials/icon', { name: 'watch' }) %></span><span><span class="badge-k"><%= t('prep') %></span><span class="badge-v"><%= formatTime(recipe.prep_time) %></span></span></div>
       <% } %>
       <% if (formatTime(recipe.cook_time)) { %>
-        <div class="badge"><span class="badge-ico">🔥</span><span><span class="badge-k"><%= t('cook') %></span><span class="badge-v"><%= formatTime(recipe.cook_time) %></span></span></div>
+        <div class="badge"><span class="badge-ico"><%- include('partials/icon', { name: 'pot' }) %></span><span><span class="badge-k"><%= t('cook') %></span><span class="badge-v"><%= formatTime(recipe.cook_time) %></span></span></div>
+      <% } %>
+      <% if (formatTime(recipe.rest_time)) { %>
+        <div class="badge"><span class="badge-ico"><%- include('partials/icon', { name: 'hourglass' }) %></span><span><span class="badge-k"><%= t('rest') %></span><span class="badge-v"><%= formatTime(recipe.rest_time) %></span></span></div>
       <% } %>
       <% if (formatTime(totalTime)) { %>
-        <div class="badge"><span class="badge-ico">⏲</span><span><span class="badge-k"><%= t('total') %></span><span class="badge-v"><%= formatTime(totalTime) %></span></span></div>
+        <div class="badge"><span class="badge-ico"><%- include('partials/icon', { name: 'clock' }) %></span><span><span class="badge-k"><%= t('total') %></span><span class="badge-v"><%= formatTime(totalTime) %></span></span></div>
       <% } %>
-      <div class="badge"><span class="badge-ico">📊</span><span><span class="badge-k"><%= t('difficulty') %></span><span class="badge-v"><%= t('diff_' + recipe.difficulty) %></span></span></div>
+      <div class="badge"><span class="badge-ico"><%- include('partials/icon', { name: 'gauge' }) %></span><span><span class="badge-k"><%= t('difficulty') %></span><span class="badge-v"><%= t('diff_' + recipe.difficulty) %></span></span></div>
       <% if (author || recipe.author_name) { %>
         <div class="badge">
           <% if (author) { %>

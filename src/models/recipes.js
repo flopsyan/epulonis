@@ -28,6 +28,7 @@ function sanitize(data) {
     servings_unit: String(data.servings_unit || '').trim() || 'Servings',
     prep_time: parseIntOr(data.prep_time, 0),
     cook_time: parseIntOr(data.cook_time, 0),
+    rest_time: parseIntOr(data.rest_time, 0),
     difficulty: DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'Medium',
     notes: String(data.notes || '').trim(),
     author_id: data.author_id != null && data.author_id !== '' ? Number(data.author_id) : null,
@@ -49,9 +50,9 @@ function sanitize(data) {
 
 const insertRecipeStmt = db.prepare(`
   INSERT INTO recipes
-    (slug, title, description, image_url, servings, servings_unit, prep_time, cook_time, difficulty, notes, author_id, author_name)
+    (slug, title, description, image_url, servings, servings_unit, prep_time, cook_time, rest_time, difficulty, notes, author_id, author_name)
   VALUES
-    (@slug, @title, @description, @image_url, @servings, @servings_unit, @prep_time, @cook_time, @difficulty, @notes, @author_id, @author_name)
+    (@slug, @title, @description, @image_url, @servings, @servings_unit, @prep_time, @cook_time, @rest_time, @difficulty, @notes, @author_id, @author_name)
 `);
 const insertIngredientStmt = db.prepare(`
   INSERT INTO ingredients (recipe_id, position, amount, unit, name, note)
@@ -96,7 +97,7 @@ export const updateRecipe = db.transaction((id, data) => {
     UPDATE recipes SET
       slug=@slug, title=@title, description=@description, image_url=@image_url,
       servings=@servings, servings_unit=@servings_unit, prep_time=@prep_time,
-      cook_time=@cook_time, difficulty=@difficulty, notes=@notes,
+      cook_time=@cook_time, rest_time=@rest_time, difficulty=@difficulty, notes=@notes,
       updated_at=datetime('now')
     WHERE id=@id
   `).run({ ...clean, slug, id });

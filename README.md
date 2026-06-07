@@ -11,7 +11,7 @@ recipes – with a servings calculator and a live match against your own pantry.
 ## Features
 
 - **Create & edit recipes** through a flexible form: title, image, short description, servings,
-  prep and cook time, difficulty, any number of ingredients and steps, tags and free-form notes
+  active, cook/bake and resting time, difficulty, any number of ingredients and steps, tags and free-form notes
   (e.g. “put the chicken breast in the fridge the day before”).
 - **Overview page** with a card layout and **tag filtering**.
 - **Search with title priority:** title matches always rank above matches that only appear in the

@@ -28,9 +28,9 @@
     <% } %>
 
     <div class="card-meta">
-      <% const total = (recipe.prep_time || 0) + (recipe.cook_time || 0); %>
-      <% if (formatTime(total)) { %><span title="<%= t('total_time') %>">⏱ <%= formatTime(total) %></span><% } %>
-      <span title="<%= t('servings_label') %>">🍽 <%= formatAmount(recipe.servings) %> <%= recipe.servings_unit %></span>
+      <% const total = (recipe.prep_time || 0) + (recipe.cook_time || 0) + (recipe.rest_time || 0); %>
+      <% if (formatTime(total)) { %><span title="<%= t('total_time') %>"><%- include('icon', { name: 'clock' }) %> <%= formatTime(total) %></span><% } %>
+      <span title="<%= t('servings_label') %>"><%- include('icon', { name: 'servings' }) %> <%= formatAmount(recipe.servings) %> <%= recipe.servings_unit %></span>
     </div>
   </div>
 </article>
