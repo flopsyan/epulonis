@@ -1,7 +1,7 @@
 {
   "name": "epulonis",
   "version": "1.0.0",
-  "description": "Selbstgehostete Rezeptplattform – Rezepte verwalten, durchsuchen, Portionen skalieren und mit dem eigenen Vorrat abgleichen.",
+  "description": "Self-hosted recipe platform – manage and search recipes, scale servings and match ingredients against your own pantry.",
   "type": "module",
   "license": "Apache-2.0",
   "engines": {

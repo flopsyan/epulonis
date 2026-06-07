@@ -1,32 +1,32 @@
 <%- include('partials/header') %>
 
 <div class="page-head">
-  <h1>Vorratskammer</h1>
-  <p class="page-sub">Trag ein, was du zu Hause hast – die Rezepte zeigen dann live an, ob eine Zutat vorhanden ist.</p>
+  <h1>Pantry</h1>
+  <p class="page-sub">Add what you have at home – recipes then show live whether an ingredient is in stock.</p>
 </div>
 
 <div class="pantry-layout">
   <section class="form-card pantry-form-card">
-    <h2 class="form-section-title" id="pantry-form-title">Lebensmittel hinzufügen</h2>
-    <form class="pantry-form" method="post" action="/vorrat" id="pantry-form">
+    <h2 class="form-section-title" id="pantry-form-title">Add an item</h2>
+    <form class="pantry-form" method="post" action="/pantry" id="pantry-form">
       <div class="field">
-        <label for="p-name">Lebensmittel</label>
-        <input type="text" id="p-name" name="name" required placeholder="z. B. Mehl" />
-        <p class="hint">Gleicher Name wie in den Rezept-Zutaten = automatischer Abgleich.</p>
+        <label for="p-name">Item</label>
+        <input type="text" id="p-name" name="name" required placeholder="e.g. Flour" />
+        <p class="hint">Same name as in the recipe ingredients = automatic match.</p>
       </div>
       <div class="grid-2">
         <div class="field">
-          <label for="p-amount">Menge</label>
-          <input type="text" id="p-amount" name="amount" inputmode="decimal" placeholder="z. B. 500" />
+          <label for="p-amount">Amount</label>
+          <input type="text" id="p-amount" name="amount" inputmode="decimal" placeholder="e.g. 500" />
         </div>
         <div class="field">
-          <label for="p-unit">Einheit</label>
-          <input type="text" id="p-unit" name="unit" list="unit-list" placeholder="g / ml / Stück" />
+          <label for="p-unit">Unit</label>
+          <input type="text" id="p-unit" name="unit" list="unit-list" placeholder="g / ml / pcs" />
         </div>
       </div>
       <div class="form-actions form-actions-inline">
-        <button type="button" class="btn btn-ghost" id="pantry-reset" hidden>Neu</button>
-        <button type="submit" class="btn btn-primary" id="pantry-submit">Speichern</button>
+        <button type="button" class="btn btn-ghost" id="pantry-reset" hidden>New</button>
+        <button type="submit" class="btn btn-primary" id="pantry-submit">Save</button>
       </div>
     </form>
   </section>
@@ -35,26 +35,26 @@
     <% if (items.length === 0) { %>
       <div class="empty-state small">
         <div class="empty-emoji">🧺</div>
-        <h2>Vorrat ist leer</h2>
-        <p>Füge links das erste Lebensmittel hinzu.</p>
+        <h2>Pantry is empty</h2>
+        <p>Add your first item on the left.</p>
       </div>
     <% } else { %>
-      <div class="pantry-count"><%= items.length %> <%= items.length === 1 ? 'Eintrag' : 'Einträge' %></div>
+      <div class="pantry-count"><%= items.length %> <%= items.length === 1 ? 'entry' : 'entries' %></div>
       <ul class="pantry-list">
         <% items.forEach((item) => { %>
           <li class="pantry-item"
               data-name="<%= item.name %>"
-              data-amount="<%= item.amount === null ? '' : formatAmount(item.amount) %>"
+              data-amount="<%= item.amount === null ? '' : item.amount %>"
               data-unit="<%= item.unit %>">
             <span class="pantry-item-name"><%= item.name %></span>
             <span class="pantry-item-qty">
               <% if (item.amount !== null) { %><%= formatAmount(item.amount) %> <% } %><%= item.unit %>
             </span>
             <span class="pantry-item-actions">
-              <button type="button" class="icon-btn pantry-edit" title="Bearbeiten">✎</button>
-              <form method="post" action="/vorrat/<%= item.id %>/loeschen"
-                    onsubmit="return confirm('„<%= item.name %>“ aus dem Vorrat entfernen?');">
-                <button type="submit" class="icon-btn danger" title="Entfernen">🗑</button>
+              <button type="button" class="icon-btn pantry-edit" title="Edit">✎</button>
+              <form method="post" action="/pantry/<%= item.id %>/delete"
+                    onsubmit="return confirm('Remove „<%= item.name %>“ from the pantry?');">
+                <button type="submit" class="icon-btn danger" title="Remove">🗑</button>
               </form>
             </span>
           </li>
@@ -67,8 +67,8 @@
 <datalist id="unit-list">
   <option value="g"></option><option value="kg"></option>
   <option value="ml"></option><option value="l"></option>
-  <option value="Stück"></option><option value="Päckchen"></option>
-  <option value="Zehen"></option><option value="Dose"></option>
+  <option value="pcs"></option><option value="packet"></option>
+  <option value="cloves"></option><option value="can"></option>
 </datalist>
 
 <%- include('partials/footer', { pageScript: 'pantry.js' }) %>

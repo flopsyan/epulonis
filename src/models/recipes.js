@@ -2,7 +2,7 @@ import db from '../db.js';
 import { uniqueSlug } from '../lib/slug.js';
 import { setRecipeTags, tagsForRecipeIds } from './tags.js';
 
-const DIFFICULTIES = ['Einfach', 'Mittel', 'Schwer'];
+const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 
 function parseAmount(v) {
   if (v == null) return null;
@@ -17,18 +17,18 @@ function parseIntOr(v, fallback = 0) {
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
 
-// Wandelt rohe Formulardaten in ein sauberes Rezept-Objekt.
+// Turns raw form data into a clean recipe object.
 function sanitize(data) {
   const servings = parseAmount(data.servings);
   return {
-    title: String(data.title || '').trim() || 'Unbenanntes Rezept',
+    title: String(data.title || '').trim() || 'Untitled recipe',
     description: String(data.description || '').trim(),
     image_url: String(data.image_url || '').trim(),
     servings: servings && servings > 0 ? servings : 4,
-    servings_unit: String(data.servings_unit || '').trim() || 'Portionen',
+    servings_unit: String(data.servings_unit || '').trim() || 'Servings',
     prep_time: parseIntOr(data.prep_time, 0),
     cook_time: parseIntOr(data.cook_time, 0),
-    difficulty: DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'Mittel',
+    difficulty: DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'Medium',
     notes: String(data.notes || '').trim(),
     tags: Array.isArray(data.tags) ? data.tags : [],
     ingredients: (Array.isArray(data.ingredients) ? data.ingredients : [])
@@ -82,7 +82,7 @@ export const updateRecipe = db.transaction((id, data) => {
   const current = db.prepare('SELECT slug, title FROM recipes WHERE id = ?').get(id);
   if (!current) return null;
 
-  // Slug nur neu vergeben, wenn sich der Titel geändert hat.
+  // Only assign a new slug when the title has changed.
   let slug = current.slug;
   if (clean.title !== current.title) {
     slug = uniqueSlug(clean.title, (s) =>
@@ -133,14 +133,14 @@ export function countRecipes() {
   return db.prepare('SELECT COUNT(*) AS c FROM recipes').get().c;
 }
 
-// Hängt Tags an eine Liste von Rezept-Zeilen an.
+// Attaches tags to a list of recipe rows.
 function attachTags(rows) {
   const map = tagsForRecipeIds(rows.map((r) => r.id));
   for (const r of rows) r.tags = map.get(r.id) || [];
   return rows;
 }
 
-// Überblicksliste, optional nach Tag-Slug gefiltert.
+// Overview list, optionally filtered by tag slug.
 export function listRecipes({ tagSlug } = {}) {
   let rows;
   if (tagSlug) {
@@ -159,20 +159,15 @@ export function listRecipes({ tagSlug } = {}) {
   return attachTags(rows);
 }
 
-// Faltet Umlaute & Groß-/Kleinschreibung für eine tolerante Suche.
+// Folds case for a tolerant search.
 function fold(s) {
-  return String(s || '')
-    .toLowerCase()
-    .replace(/ä/g, 'ae')
-    .replace(/ö/g, 'oe')
-    .replace(/ü/g, 'ue')
-    .replace(/ß/g, 'ss');
+  return String(s || '').toLowerCase();
 }
 
-// Volltextsuche mit Titel-Priorität.
-// Titeltreffer (Gewicht 100) ranken IMMER vor reinen Inhaltstreffern (max ~42),
-// d. h. "Zitrone" liefert zuerst den "Zitronenkuchen", dann Rezepte, die
-// Zitrone nur als Zutat o. Ä. enthalten.
+// Full-text search with title priority.
+// Title matches (weight 100) ALWAYS rank above content-only matches (max ~42),
+// i.e. "lemon" returns the "Lemon Cake" first, then recipes that merely use
+// lemon as an ingredient.
 export function searchRecipes(query) {
   const q = fold(query.trim());
   if (!q) return [];
@@ -197,7 +192,7 @@ export function searchRecipes(query) {
     if (title.includes(q)) {
       score += 100;
       titleMatch = true;
-      if (title.startsWith(q)) score += 25; // exakter Wortanfang etwas höher
+      if (title.startsWith(q)) score += 25; // exact word start ranks a bit higher
     }
     if (fold(r.description).includes(q)) score += 12;
     if (fold(r.ing_text).includes(q)) score += 10;
@@ -212,6 +207,6 @@ export function searchRecipes(query) {
     }
   }
 
-  scored.sort((a, b) => b._score - a._score || a.title.localeCompare(b.title, 'de'));
+  scored.sort((a, b) => b._score - a._score || a.title.localeCompare(b.title, 'en'));
   return attachTags(scored);
 }

@@ -1,4 +1,4 @@
-// Live-Suche im Kopfbereich: Titel-Priorität, dann Rezepttext.
+// Live search in the header: title priority, then recipe text.
 const input = document.getElementById('search-input');
 const box = document.getElementById('search-results');
 
@@ -20,7 +20,7 @@ if (input && box) {
   function buildItem(r) {
     const a = document.createElement('a');
     a.className = 'sr-item';
-    a.href = `/rezept/${r.slug}`;
+    a.href = `/recipe/${r.slug}`;
     a.setAttribute('role', 'option');
 
     if (r.image_url) {
@@ -43,7 +43,7 @@ if (input && box) {
     const sub = document.createElement('span');
     sub.className = 'sr-sub';
     const tagText = (r.tags || []).map((t) => t.name).slice(0, 3).join(' · ');
-    sub.textContent = r.titleMatch ? (tagText || r.difficulty || '') : 'Treffer im Rezepttext';
+    sub.textContent = r.titleMatch ? (tagText || r.difficulty || '') : 'Match in recipe text';
     text.append(title, sub);
     a.appendChild(text);
     return a;
@@ -54,7 +54,7 @@ if (input && box) {
     if (!results.length) {
       const empty = document.createElement('div');
       empty.className = 'sr-empty';
-      empty.textContent = 'Keine Treffer';
+      empty.textContent = 'No matches';
       box.appendChild(empty);
       box.removeAttribute('hidden');
       items = []; active = -1;
@@ -82,7 +82,7 @@ if (input && box) {
     if (controller) controller.abort();
     controller = new AbortController();
     try {
-      const res = await fetch(`/api/suche?q=${encodeURIComponent(q)}`, { signal: controller.signal });
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal });
       const data = await res.json();
       show(data.results || []);
     } catch (e) {

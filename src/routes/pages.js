@@ -13,9 +13,9 @@ import { normalizeName, pantryStatus } from '../lib/units.js';
 
 const router = express.Router();
 
-const DIFFICULTIES = ['Einfach', 'Mittel', 'Schwer'];
+const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 
-// Rohe Formulardaten in ein sauberes Datenobjekt überführen.
+// Turns raw form data into a clean data object.
 function normalizeRecipeBody(body) {
   let ingredients = body.ingredients;
   if (!ingredients) ingredients = [];
@@ -34,7 +34,7 @@ function normalizeRecipeBody(body) {
   return { ...body, ingredients, steps, tags };
 }
 
-// --- Übersicht / Suche -----------------------------------------------------
+// --- Overview / search -----------------------------------------------------
 router.get('/', (req, res) => {
   const q = (req.query.q || '').trim();
   const tagSlug = (req.query.tag || '').trim();
@@ -51,7 +51,7 @@ router.get('/', (req, res) => {
   }
 
   res.render('index', {
-    title: q ? `Suche: ${q}` : 'Alle Rezepte',
+    title: q ? `Search: ${q}` : 'All recipes',
     recipes,
     tags: allTagsWithCounts(),
     activeTag,
@@ -60,61 +60,61 @@ router.get('/', (req, res) => {
   });
 });
 
-// --- Neues Rezept ----------------------------------------------------------
-router.get('/neu', (req, res) => {
+// --- New recipe ------------------------------------------------------------
+router.get('/new', (req, res) => {
   res.render('recipe-form', {
-    title: 'Neues Rezept',
+    title: 'New recipe',
     mode: 'create',
-    formAction: '/rezept',
+    formAction: '/recipe',
     difficulties: DIFFICULTIES,
     recipe: {
       title: '', description: '', image_url: '', servings: 4,
-      servings_unit: 'Portionen', prep_time: '', cook_time: '',
-      difficulty: 'Mittel', notes: '',
+      servings_unit: 'Servings', prep_time: '', cook_time: '',
+      difficulty: 'Medium', notes: '',
       ingredients: [], steps: [], tags: [],
     },
   });
 });
 
-router.post('/rezept', (req, res) => {
+router.post('/recipe', (req, res) => {
   const slug = createRecipe(normalizeRecipeBody(req.body));
-  res.redirect(`/rezept/${slug}`);
+  res.redirect(`/recipe/${slug}`);
 });
 
-// --- Rezept bearbeiten -----------------------------------------------------
-router.get('/rezept/:slug/bearbeiten', (req, res) => {
+// --- Edit recipe -----------------------------------------------------------
+router.get('/recipe/:slug/edit', (req, res) => {
   const recipe = getRecipeBySlug(req.params.slug);
-  if (!recipe) return res.status(404).render('404', { title: 'Nicht gefunden' });
+  if (!recipe) return res.status(404).render('404', { title: 'Not found' });
   res.render('recipe-form', {
-    title: `Bearbeiten: ${recipe.title}`,
+    title: `Edit: ${recipe.title}`,
     mode: 'edit',
-    formAction: `/rezept/${recipe.slug}`,
+    formAction: `/recipe/${recipe.slug}`,
     difficulties: DIFFICULTIES,
     recipe,
   });
 });
 
-router.post('/rezept/:slug', (req, res) => {
+router.post('/recipe/:slug', (req, res) => {
   const recipe = getRecipeBySlug(req.params.slug);
-  if (!recipe) return res.status(404).render('404', { title: 'Nicht gefunden' });
+  if (!recipe) return res.status(404).render('404', { title: 'Not found' });
   const slug = updateRecipe(recipe.id, normalizeRecipeBody(req.body));
-  res.redirect(`/rezept/${slug}`);
+  res.redirect(`/recipe/${slug}`);
 });
 
-router.post('/rezept/:slug/loeschen', (req, res) => {
+router.post('/recipe/:slug/delete', (req, res) => {
   const recipe = getRecipeBySlug(req.params.slug);
   if (recipe) deleteRecipe(recipe.id);
   res.redirect('/');
 });
 
-// --- Rezept-Detailseite ----------------------------------------------------
-router.get('/rezept/:slug', (req, res) => {
+// --- Recipe detail page ----------------------------------------------------
+router.get('/recipe/:slug', (req, res) => {
   const recipe = getRecipeBySlug(req.params.slug);
-  if (!recipe) return res.status(404).render('404', { title: 'Nicht gefunden' });
+  if (!recipe) return res.status(404).render('404', { title: 'Not found' });
 
   const pantry = pantryMap();
-  // Anfangsstatus serverseitig berechnen (funktioniert auch ohne JavaScript);
-  // das Skript rechnet beim Ändern der Portionen live nach.
+  // Compute the initial status on the server (works without JavaScript too);
+  // the script recomputes live when the servings change.
   for (const ing of recipe.ingredients) {
     const have = pantry[normalizeName(ing.name)];
     const { status } = pantryStatus({ amount: ing.amount, unit: ing.unit }, have);
@@ -124,31 +124,31 @@ router.get('/rezept/:slug', (req, res) => {
   res.render('recipe', {
     title: recipe.title,
     recipe,
-    // sicher in ein <script>-Tag einbettbar
+    // safe to embed inside a <script> tag
     pantryJson: JSON.stringify(pantry).replace(/</g, '\\u003c'),
   });
 });
 
-// --- Vorratskammer ---------------------------------------------------------
-router.get('/vorrat', (req, res) => {
+// --- Pantry ----------------------------------------------------------------
+router.get('/pantry', (req, res) => {
   res.render('pantry', {
-    title: 'Vorratskammer',
+    title: 'Pantry',
     items: allPantry(),
   });
 });
 
-router.post('/vorrat', (req, res) => {
+router.post('/pantry', (req, res) => {
   upsertPantry({
     name: req.body.name,
     amount: req.body.amount,
     unit: req.body.unit,
   });
-  res.redirect('/vorrat');
+  res.redirect('/pantry');
 });
 
-router.post('/vorrat/:id/loeschen', (req, res) => {
+router.post('/pantry/:id/delete', (req, res) => {
   deletePantry(req.params.id);
-  res.redirect('/vorrat');
+  res.redirect('/pantry');
 });
 
 export default router;

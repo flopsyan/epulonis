@@ -1,7 +1,9 @@
-// Erzeugt aus einem Titel einen URL-tauglichen "Slug".
-// Beispiel: "Omas Apfelkuchen!" -> "omas-apfelkuchen"
+// Turns a title into a URL-friendly "slug".
+// Example: "Grandma's Apple Pie!" -> "grandmas-apple-pie"
 
-const UMLAUT_MAP = {
+// Map accented characters (incl. German umlauts) to ASCII so titles in any
+// language still produce clean slugs.
+const ACCENT_MAP = {
   ä: 'ae', ö: 'oe', ü: 'ue', ß: 'ss',
   Ä: 'ae', Ö: 'oe', Ü: 'ue',
   à: 'a', á: 'a', â: 'a', ã: 'a',
@@ -15,15 +17,15 @@ const UMLAUT_MAP = {
 export function slugify(text) {
   const base = String(text || '')
     .trim()
-    .replace(/[äöüßÄÖÜàáâãèéêëìíîïòóôõùúûçñ]/g, (ch) => UMLAUT_MAP[ch] || ch)
+    .replace(/[äöüßÄÖÜàáâãèéêëìíîïòóôõùúûçñ]/g, (ch) => ACCENT_MAP[ch] || ch)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
-  return base || 'rezept';
+  return base || 'recipe';
 }
 
-// Stellt sicher, dass ein Slug eindeutig ist. `exists` ist eine Funktion,
-// die true zurückgibt, wenn der Slug bereits vergeben ist.
+// Ensures a slug is unique. `exists` is a function that returns true when the
+// slug is already taken.
 export function uniqueSlug(text, exists) {
   const base = slugify(text);
   let candidate = base;

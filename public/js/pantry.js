@@ -1,4 +1,4 @@
-// Komfort: vorhandenen Vorrats-Eintrag ins Formular laden (Bearbeiten).
+// Convenience: load an existing pantry entry into the form (edit).
 const form = document.getElementById('pantry-form');
 if (form) {
   const nameEl = document.getElementById('p-name');
@@ -12,8 +12,8 @@ if (form) {
     nameEl.value = '';
     amountEl.value = '';
     unitEl.value = '';
-    title.textContent = 'Lebensmittel hinzufügen';
-    submit.textContent = 'Speichern';
+    title.textContent = 'Add an item';
+    submit.textContent = 'Save';
     reset.hidden = true;
     nameEl.focus();
   }
@@ -24,8 +24,8 @@ if (form) {
       nameEl.value = item.dataset.name || '';
       amountEl.value = item.dataset.amount || '';
       unitEl.value = item.dataset.unit || '';
-      title.textContent = 'Eintrag bearbeiten';
-      submit.textContent = 'Aktualisieren';
+      title.textContent = 'Edit item';
+      submit.textContent = 'Update';
       reset.hidden = false;
       form.scrollIntoView({ behavior: 'smooth', block: 'center' });
       amountEl.focus();

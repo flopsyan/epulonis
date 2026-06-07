@@ -1,9 +1,10 @@
 /* ============================================================
-   Rezeptplattform – Stylesheet
-   Warmes, gemütliches Kochbuch-Design, komplett mit System-Fonts.
+   Epulonis – Stylesheet
+   Warm, cosy cookbook design, system fonts only. Light & dark theme.
    ============================================================ */
 
 :root {
+  color-scheme: light;
   --bg: #faf6f0;
   --surface: #ffffff;
   --surface-2: #f4ede3;
@@ -25,6 +26,8 @@
   --unknown: #6b7280;
   --unknown-bg: #ecedf0;
 
+  --header-bg: rgba(250, 246, 240, .88);
+
   --shadow-sm: 0 1px 2px rgba(40, 30, 20, .05);
   --shadow: 0 1px 2px rgba(40, 30, 20, .04), 0 10px 28px rgba(60, 40, 20, .07);
   --shadow-lg: 0 12px 40px rgba(60, 40, 20, .14);
@@ -35,6 +38,55 @@
 
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ============================================================
+   Dark theme – applied via [data-theme="dark"] or, for the "System"
+   setting, via prefers-color-scheme unless the user forced light.
+   ============================================================ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1b1714;
+  --surface: #251f1a;
+  --surface-2: #2f2823;
+  --text: #ece4d8;
+  --muted: #a99e8e;
+  --border: #3a322a;
+  --border-strong: #4b4137;
+  --primary: #cf5d40;
+  --primary-dark: #ec8a65;
+  --primary-soft: #3a2620;
+  --ok: #74c79b; --ok-bg: #1f3a2c;
+  --low: #e0b15a; --low-bg: #3a3120;
+  --missing: #ec8a82; --missing-bg: #3d2723;
+  --unknown: #9aa3ae; --unknown-bg: #2a2e34;
+  --header-bg: rgba(27, 23, 20, .85);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .45);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, .55);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #1b1714;
+    --surface: #251f1a;
+    --surface-2: #2f2823;
+    --text: #ece4d8;
+    --muted: #a99e8e;
+    --border: #3a322a;
+    --border-strong: #4b4137;
+    --primary: #cf5d40;
+    --primary-dark: #ec8a65;
+    --primary-soft: #3a2620;
+    --ok: #74c79b; --ok-bg: #1f3a2c;
+    --low: #e0b15a; --low-bg: #3a3120;
+    --missing: #ec8a82; --missing-bg: #3d2723;
+    --unknown: #9aa3ae; --unknown-bg: #2a2e34;
+    --header-bg: rgba(27, 23, 20, .85);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .45);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, .55);
+  }
 }
 
 * { box-sizing: border-box; }
@@ -74,7 +126,7 @@ img { max-width: 100%; display: block; }
 /* ---------- Header / Nav ---------- */
 .site-header {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(250, 246, 240, .88);
+  background: var(--header-bg);
   backdrop-filter: saturate(1.4) blur(10px);
   border-bottom: 1px solid var(--border);
 }
@@ -97,8 +149,8 @@ img { max-width: 100%; display: block; }
 /* ---------- Suche ---------- */
 .search { position: relative; flex: 1 1 auto; max-width: 440px; }
 .search-icon {
-  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-  font-size: .9rem; opacity: .6; pointer-events: none;
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  display: flex; color: var(--muted); opacity: .85; pointer-events: none;
 }
 /* type-Attribut im Selektor, damit die generische input[type="search"]-Regel
    weiter unten das linke Padding (Platz fürs Icon) nicht überschreibt */
@@ -216,7 +268,7 @@ img { max-width: 100%; display: block; }
 }
 .card-badge {
   position: absolute; top: 10px; right: 10px; z-index: 2;
-  background: rgba(255,255,255,.92); color: var(--text);
+  background: rgba(255,255,255,.92); color: #2c2622;
   font-size: .74rem; font-weight: 600; padding: 4px 10px; border-radius: 999px;
   box-shadow: var(--shadow-sm);
 }
@@ -335,12 +387,13 @@ img { max-width: 100%; display: block; }
 
 /* Zubereitung */
 .notes-box {
-  display: flex; gap: 12px; background: var(--low-bg); border: 1px solid #eed9a8;
+  display: flex; gap: 12px; background: var(--low-bg);
+  border: 1px solid var(--border); border-left: 4px solid var(--low);
   border-radius: var(--radius); padding: 14px 16px; margin-bottom: 24px;
 }
 .notes-box .notes-ico { font-size: 1.2rem; }
-.notes-box strong { display: block; margin-bottom: 2px; }
-.notes-box p { margin: 0; color: #6f5a23; }
+.notes-box strong { display: block; margin-bottom: 2px; color: var(--text); }
+.notes-box p { margin: 0; color: var(--text); opacity: .85; }
 
 .step-list { list-style: none; counter-reset: step; margin: 0; padding: 0; }
 .step-list li {
@@ -389,6 +442,7 @@ textarea { resize: vertical; line-height: 1.5; }
 input:focus, textarea:focus, select:focus {
   outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft);
 }
+::placeholder { color: var(--muted); opacity: .75; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 
@@ -450,6 +504,18 @@ input:focus, textarea:focus, select:focus {
 }
 .footer-links { display: flex; gap: 16px; }
 .footer-links a { color: var(--muted); }
+.footer-right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.theme-switch {
+  display: inline-flex; gap: 2px; padding: 3px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+}
+.theme-btn {
+  border: none; background: transparent; color: var(--muted);
+  font-family: var(--sans); font-size: .82rem; font-weight: 500;
+  padding: 5px 12px; border-radius: 999px; cursor: pointer; transition: background .15s, color .15s;
+}
+.theme-btn:hover { color: var(--text); }
+.theme-btn.active { background: var(--primary); color: #fff; }
 
 .error-detail {
   text-align: left; white-space: pre-wrap; word-break: break-word;

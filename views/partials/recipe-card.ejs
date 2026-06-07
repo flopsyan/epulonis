@@ -1,5 +1,5 @@
 <article class="card recipe-card">
-  <a class="card-media" href="/rezept/<%= recipe.slug %>">
+  <a class="card-media" href="/recipe/<%= recipe.slug %>">
     <span class="card-fallback" aria-hidden="true"><%= (recipe.title || '?').trim().charAt(0).toUpperCase() %></span>
     <% if (recipe.image_url) { %>
       <img
@@ -21,7 +21,7 @@
       </div>
     <% } %>
 
-    <h3 class="card-title"><a href="/rezept/<%= recipe.slug %>"><%= recipe.title %></a></h3>
+    <h3 class="card-title"><a href="/recipe/<%= recipe.slug %>"><%= recipe.title %></a></h3>
 
     <% if (recipe.description) { %>
       <p class="card-desc"><%= recipe.description %></p>
@@ -29,8 +29,8 @@
 
     <div class="card-meta">
       <% const total = (recipe.prep_time || 0) + (recipe.cook_time || 0); %>
-      <% if (formatTime(total)) { %><span title="Gesamtzeit">⏱ <%= formatTime(total) %></span><% } %>
-      <span title="Portionen">🍽 <%= formatAmount(recipe.servings) %> <%= recipe.servings_unit %></span>
+      <% if (formatTime(total)) { %><span title="Total time">⏱ <%= formatTime(total) %></span><% } %>
+      <span title="Servings">🍽 <%= formatAmount(recipe.servings) %> <%= recipe.servings_unit %></span>
     </div>
   </div>
 </article>

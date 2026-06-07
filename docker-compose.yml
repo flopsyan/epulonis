@@ -1,4 +1,4 @@
-# Fester Projektname, damit Volumes & Container unabhängig vom Ordnernamen heißen
+# Fixed project name so volumes & containers are independent of the folder name
 name: epulonis
 
 services:
@@ -8,16 +8,16 @@ services:
     container_name: epulonis
     restart: unless-stopped
     ports:
-      # Host-Port ist über die .env (PORT) anpassbar, Standard 3000
+      # Host port is configurable via .env (PORT), default 3000
       - "${PORT:-3000}:3000"
     environment:
       SITE_NAME: ${SITE_NAME:-Epulonis}
-      # Beispieldaten beim allerersten Start einspielen (true/false)
+      # Seed example data on the very first start (true/false)
       SEED_DEMO: ${SEED_DEMO:-true}
       NODE_ENV: production
     volumes:
-      # Persistente Daten (SQLite-Datenbank). Named Volume = übersteht Updates.
-      - rezept-daten:/app/data
+      # Persistent data (SQLite database). Named volume = survives updates.
+      - recipe-data:/app/data
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
@@ -26,4 +26,4 @@ services:
       start_period: 10s
 
 volumes:
-  rezept-daten:
+  recipe-data:

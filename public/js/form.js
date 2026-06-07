@@ -1,4 +1,4 @@
-// Dynamische Zutaten-/Schritt-Zeilen + Bildvorschau für das Rezeptformular.
+// Dynamic ingredient/step rows + image preview for the recipe form.
 
 const ingredientRows = document.getElementById('ingredient-rows');
 const stepRows = document.getElementById('step-rows');
@@ -12,11 +12,11 @@ function el(html) {
 function ingredientRow() {
   return el(`
     <div class="row ingredient-row">
-      <input type="text" class="cell-amount" data-field="amount" inputmode="decimal" placeholder="Menge" />
-      <input type="text" class="cell-unit" data-field="unit" placeholder="Einheit" list="unit-list" />
-      <input type="text" class="cell-name" data-field="name" placeholder="Zutat" />
-      <input type="text" class="cell-note" data-field="note" placeholder="Notiz (optional)" />
-      <button type="button" class="row-remove" aria-label="Zutat entfernen">✕</button>
+      <input type="text" class="cell-amount" data-field="amount" inputmode="decimal" placeholder="Amount" />
+      <input type="text" class="cell-unit" data-field="unit" placeholder="Unit" list="unit-list" />
+      <input type="text" class="cell-name" data-field="name" placeholder="Ingredient" />
+      <input type="text" class="cell-note" data-field="note" placeholder="Note (optional)" />
+      <button type="button" class="row-remove" aria-label="Remove ingredient">✕</button>
     </div>`);
 }
 
@@ -24,12 +24,12 @@ function stepRow() {
   return el(`
     <div class="row step-row">
       <span class="step-num"></span>
-      <textarea data-field="step" name="steps[]" rows="2" placeholder="Schritt beschreiben …"></textarea>
-      <button type="button" class="row-remove" aria-label="Schritt entfernen">✕</button>
+      <textarea data-field="step" name="steps[]" rows="2" placeholder="Describe the step …"></textarea>
+      <button type="button" class="row-remove" aria-label="Remove step">✕</button>
     </div>`);
 }
 
-// Zutaten brauchen indizierte Namen (ingredients[i][feld]).
+// Ingredients need indexed names (ingredients[i][field]).
 function reindexIngredients() {
   if (!ingredientRows) return;
   [...ingredientRows.querySelectorAll('.ingredient-row')].forEach((row, i) => {
@@ -39,7 +39,7 @@ function reindexIngredients() {
   });
 }
 
-// Schritte nutzen steps[] – nur die Nummern aktualisieren.
+// Steps use steps[] – only update the numbers.
 function reindexSteps() {
   if (!stepRows) return;
   [...stepRows.querySelectorAll('.step-row')].forEach((row, i) => {
@@ -64,11 +64,11 @@ function setupSection(container, factory, addBtnId, reindex, focusSelector) {
     const btn = e.target.closest('.row-remove');
     if (!btn) return;
     btn.closest('.row').remove();
-    // mindestens eine leere Zeile behalten
+    // keep at least one empty row
     if (!container.children.length) container.appendChild(factory());
     reindex();
   });
-  // beim Laden: leere Startzeile, falls keine vorhanden
+  // on load: empty starter row if none present
   if (!container.children.length) container.appendChild(factory());
   reindex();
 }
@@ -76,7 +76,7 @@ function setupSection(container, factory, addBtnId, reindex, focusSelector) {
 setupSection(ingredientRows, ingredientRow, 'add-ingredient', reindexIngredients, '.cell-name');
 setupSection(stepRows, stepRow, 'add-step', reindexSteps, 'textarea');
 
-// Bildvorschau
+// Image preview
 const imageInput = document.getElementById('image_url');
 const preview = document.getElementById('image-preview');
 const previewImg = document.getElementById('image-preview-img');

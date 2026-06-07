@@ -1,20 +1,20 @@
 <%- include('partials/header') %>
 
 <%
-  // Anfangs-Darstellung der Vorrats-Pille (JS rechnet live nach).
+  // Initial render of the pantry pill (JS recomputes live).
   function pill(status) {
     switch (status) {
-      case 'ok':        return { cls: 'ok',      icon: '✓', label: 'vorhanden' };
-      case 'available': return { cls: 'ok',      icon: '✓', label: 'vorhanden' };
-      case 'low':       return { cls: 'low',     icon: '≈', label: 'zu wenig' };
-      case 'unknown':   return { cls: 'unknown', icon: '•', label: 'vorhanden' };
-      default:          return { cls: 'missing', icon: '✕', label: 'fehlt' };
+      case 'ok':        return { cls: 'ok',      icon: '✓', label: 'in stock' };
+      case 'available': return { cls: 'ok',      icon: '✓', label: 'in stock' };
+      case 'low':       return { cls: 'low',     icon: '≈', label: 'too little' };
+      case 'unknown':   return { cls: 'unknown', icon: '•', label: 'in stock' };
+      default:          return { cls: 'missing', icon: '✕', label: 'missing' };
     }
   }
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
 %>
 
-<p class="breadcrumb"><a href="/">← Alle Rezepte</a></p>
+<p class="breadcrumb"><a href="/">← All recipes</a></p>
 
 <article class="recipe" data-base-servings="<%= recipe.servings %>">
   <div class="recipe-hero">
@@ -38,21 +38,21 @@
 
     <div class="badges">
       <% if (formatTime(recipe.prep_time)) { %>
-        <div class="badge"><span class="badge-ico">⏱</span><span><span class="badge-k">Vorbereitung</span><span class="badge-v"><%= formatTime(recipe.prep_time) %></span></span></div>
+        <div class="badge"><span class="badge-ico">⏱</span><span><span class="badge-k">Prep</span><span class="badge-v"><%= formatTime(recipe.prep_time) %></span></span></div>
       <% } %>
       <% if (formatTime(recipe.cook_time)) { %>
-        <div class="badge"><span class="badge-ico">🔥</span><span><span class="badge-k">Kochzeit</span><span class="badge-v"><%= formatTime(recipe.cook_time) %></span></span></div>
+        <div class="badge"><span class="badge-ico">🔥</span><span><span class="badge-k">Cook</span><span class="badge-v"><%= formatTime(recipe.cook_time) %></span></span></div>
       <% } %>
       <% if (formatTime(totalTime)) { %>
-        <div class="badge"><span class="badge-ico">⏲</span><span><span class="badge-k">Gesamt</span><span class="badge-v"><%= formatTime(totalTime) %></span></span></div>
+        <div class="badge"><span class="badge-ico">⏲</span><span><span class="badge-k">Total</span><span class="badge-v"><%= formatTime(totalTime) %></span></span></div>
       <% } %>
-      <div class="badge"><span class="badge-ico">📊</span><span><span class="badge-k">Schwierigkeit</span><span class="badge-v"><%= recipe.difficulty %></span></span></div>
+      <div class="badge"><span class="badge-ico">📊</span><span><span class="badge-k">Difficulty</span><span class="badge-v"><%= recipe.difficulty %></span></span></div>
     </div>
 
     <div class="recipe-actions">
-      <a class="btn btn-ghost" href="/rezept/<%= recipe.slug %>/bearbeiten">✎ Bearbeiten</a>
-      <form method="post" action="/rezept/<%= recipe.slug %>/loeschen" onsubmit="return confirm('Dieses Rezept wirklich löschen?');">
-        <button type="submit" class="btn btn-danger">🗑 Löschen</button>
+      <a class="btn btn-ghost" href="/recipe/<%= recipe.slug %>/edit">✎ Edit</a>
+      <form method="post" action="/recipe/<%= recipe.slug %>/delete" onsubmit="return confirm('Really delete this recipe?');">
+        <button type="submit" class="btn btn-danger">🗑 Delete</button>
       </form>
     </div>
   </header>
@@ -60,20 +60,20 @@
   <div class="recipe-layout">
     <aside class="ingredients card">
       <div class="ing-head">
-        <h2>Zutaten</h2>
-        <div class="servings-stepper" role="group" aria-label="Portionen anpassen">
-          <button type="button" class="step-btn" data-step="-1" aria-label="weniger">−</button>
+        <h2>Ingredients</h2>
+        <div class="servings-stepper" role="group" aria-label="Adjust servings">
+          <button type="button" class="step-btn" data-step="-1" aria-label="fewer">−</button>
           <label class="servings-field">
             <input type="number" id="servings-input" min="1" step="1"
-                   value="<%= formatAmount(recipe.servings) %>" aria-label="Portionen" />
+                   value="<%= recipe.servings %>" aria-label="Servings" />
             <span class="servings-unit" id="servings-unit"><%= recipe.servings_unit %></span>
           </label>
-          <button type="button" class="step-btn" data-step="1" aria-label="mehr">+</button>
+          <button type="button" class="step-btn" data-step="1" aria-label="more">+</button>
         </div>
       </div>
 
       <p class="pantry-hint">
-        Live-Abgleich mit deinem <a href="/vorrat">Vorrat</a>.
+        Live match against your <a href="/pantry">pantry</a>.
       </p>
 
       <ul class="ingredient-list">
@@ -96,9 +96,9 @@
       </ul>
 
       <div class="pantry-legend">
-        <span><i class="dot ok"></i> vorhanden</span>
-        <span><i class="dot low"></i> zu wenig</span>
-        <span><i class="dot missing"></i> fehlt</span>
+        <span><i class="dot ok"></i> in stock</span>
+        <span><i class="dot low"></i> too little</span>
+        <span><i class="dot missing"></i> missing</span>
       </div>
     </aside>
 
@@ -107,13 +107,13 @@
         <div class="notes-box">
           <span class="notes-ico">📌</span>
           <div>
-            <strong>Notiz</strong>
+            <strong>Note</strong>
             <p><%= recipe.notes %></p>
           </div>
         </div>
       <% } %>
 
-      <h2>Zubereitung</h2>
+      <h2>Instructions</h2>
       <% if (recipe.steps.length) { %>
         <ol class="step-list">
           <% recipe.steps.forEach((s) => { %>
@@ -121,7 +121,7 @@
           <% }) %>
         </ol>
       <% } else { %>
-        <p class="muted">Für dieses Rezept sind noch keine Zubereitungsschritte hinterlegt.</p>
+        <p class="muted">No instructions have been added for this recipe yet.</p>
       <% } %>
     </section>
   </div>

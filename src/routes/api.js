@@ -3,8 +3,8 @@ import { searchRecipes } from '../models/recipes.js';
 
 const router = express.Router();
 
-// Live-Suche für das Suchfeld (Titel-Priorität, dann Inhalt).
-router.get('/suche', (req, res) => {
+// Live search for the search box (title priority, then content).
+router.get('/search', (req, res) => {
   const q = (req.query.q || '').trim();
   if (!q) return res.json({ query: q, results: [] });
 

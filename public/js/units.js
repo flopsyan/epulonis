@@ -1,17 +1,16 @@
-// Browser-Spiegel von src/lib/units.js (+ formatAmount).
-// Wird für den Live-Vorratsabgleich auf der Rezeptseite genutzt.
+// Browser mirror of src/lib/units.js (+ formatAmount).
+// Used for the live pantry match on the recipe page.
 
 const SYNONYMS = {
-  mg: 'mg', milligramm: 'mg',
-  g: 'g', gr: 'g', gramm: 'g', gramms: 'g',
-  dag: 'dag', dkg: 'dag', deka: 'dag', dekagramm: 'dag',
-  kg: 'kg', kilo: 'kg', kilogramm: 'kg',
-  ml: 'ml', milliliter: 'ml',
-  cl: 'cl', centiliter: 'cl', zentiliter: 'cl',
-  dl: 'dl', deziliter: 'dl',
-  l: 'l', liter: 'l', ltr: 'l',
-  '': 'stück', stk: 'stück', st: 'stück', stck: 'stück', stueck: 'stück',
-  'stück': 'stück', 'stücke': 'stück', x: 'stück',
+  mg: 'mg', milligram: 'mg', milligrams: 'mg',
+  g: 'g', gr: 'g', gram: 'g', grams: 'g', gramme: 'g', grammes: 'g',
+  dag: 'dag',
+  kg: 'kg', kilo: 'kg', kilogram: 'kg', kilograms: 'kg',
+  ml: 'ml', milliliter: 'ml', millilitre: 'ml', milliliters: 'ml', millilitres: 'ml',
+  cl: 'cl',
+  dl: 'dl',
+  l: 'l', liter: 'l', litre: 'l', liters: 'l', litres: 'l', ltr: 'l',
+  '': 'pcs', pc: 'pcs', pcs: 'pcs', piece: 'pcs', pieces: 'pcs', x: 'pcs',
 };
 
 const MASS = { mg: 0.001, g: 1, dag: 10, kg: 1000 };
@@ -27,16 +26,15 @@ export function toBase(amount, unit) {
   const value = amount == null || amount === '' ? null : Number(amount);
   if (u in MASS) return { dimension: 'mass', value: value == null ? null : value * MASS[u] };
   if (u in VOLUME) return { dimension: 'volume', value: value == null ? null : value * VOLUME[u] };
-  if (u === 'stück') return { dimension: 'count', value };
+  if (u === 'pcs') return { dimension: 'count', value };
   return { dimension: `other:${u}`, value };
 }
 
-const IRREGULAR_PLURALS = { eier: 'ei' };
-
 export function normalizeName(name) {
   let n = String(name ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
-  if (IRREGULAR_PLURALS[n]) return IRREGULAR_PLURALS[n];
-  if (n.length > 3 && n.endsWith('n')) n = n.slice(0, -1);
+  if (n.length > 4 && n.endsWith('ies')) return n.slice(0, -3) + 'y';
+  if (n.length > 4 && n.endsWith('oes')) return n.slice(0, -2);
+  if (n.length > 3 && n.endsWith('s') && !n.endsWith('ss')) return n.slice(0, -1);
   return n;
 }
 
@@ -54,5 +52,5 @@ export function pantryStatus(need, have) {
 export function formatAmount(value) {
   if (value == null || value === '' || Number.isNaN(Number(value))) return '';
   const rounded = Math.round(Number(value) * 100) / 100;
-  return rounded.toLocaleString('de-DE', { maximumFractionDigits: 2 });
+  return rounded.toLocaleString('en-US', { maximumFractionDigits: 2 });
 }

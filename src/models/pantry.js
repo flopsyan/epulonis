@@ -9,7 +9,7 @@ export function getPantry(id) {
   return db.prepare('SELECT * FROM pantry_items WHERE id = ?').get(id);
 }
 
-// Map normalisierter Name -> { name, amount, unit } für den Live-Abgleich.
+// Map of normalized name -> { name, amount, unit } for the live match.
 export function pantryMap() {
   const map = {};
   for (const item of allPantry()) {
@@ -18,7 +18,7 @@ export function pantryMap() {
   return map;
 }
 
-// Legt einen Eintrag an oder aktualisiert ihn (Schlüssel: normalisierter Name).
+// Creates or updates an entry (key: normalized name).
 export function upsertPantry({ name, amount, unit }) {
   const clean = String(name || '').trim();
   if (!clean) return null;

@@ -6,14 +6,14 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
 
-// Speicherort der Datenbank. Per DATA_DIR konfigurierbar (z. B. Docker-Volume).
+// Storage location of the database. Configurable via DATA_DIR (e.g. Docker volume).
 const dataDir = process.env.DATA_DIR
   ? path.resolve(process.env.DATA_DIR)
   : path.join(projectRoot, 'data');
 
 fs.mkdirSync(dataDir, { recursive: true });
 
-const dbPath = path.join(dataDir, 'rezepte.sqlite');
+const dbPath = path.join(dataDir, 'recipes.sqlite');
 const db = new Database(dbPath);
 
 db.pragma('journal_mode = WAL');
@@ -27,10 +27,10 @@ db.exec(`
     description   TEXT NOT NULL DEFAULT '',
     image_url     TEXT NOT NULL DEFAULT '',
     servings      REAL NOT NULL DEFAULT 4,
-    servings_unit TEXT NOT NULL DEFAULT 'Portionen',
+    servings_unit TEXT NOT NULL DEFAULT 'Servings',
     prep_time     INTEGER NOT NULL DEFAULT 0,
     cook_time     INTEGER NOT NULL DEFAULT 0,
-    difficulty    TEXT NOT NULL DEFAULT 'Mittel',
+    difficulty    TEXT NOT NULL DEFAULT 'Medium',
     notes         TEXT NOT NULL DEFAULT '',
     created_at    TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at    TEXT NOT NULL DEFAULT (datetime('now'))

@@ -7,7 +7,7 @@ export function getOrCreateTag(name) {
   const existing = db.prepare('SELECT * FROM tags WHERE name = ? COLLATE NOCASE').get(clean);
   if (existing) return existing;
 
-  // eindeutigen Slug finden
+  // find a unique slug
   let slug = slugify(clean);
   let i = 2;
   while (db.prepare('SELECT 1 FROM tags WHERE slug = ?').get(slug)) {
@@ -36,7 +36,7 @@ export function getTagBySlug(slug) {
   return db.prepare('SELECT * FROM tags WHERE slug = ?').get(slug);
 }
 
-// Alle Tags mit Anzahl zugeordneter Rezepte (für die Filterleiste).
+// All tags with the number of associated recipes (for the filter bar).
 export function allTagsWithCounts() {
   return db
     .prepare(
@@ -50,7 +50,7 @@ export function allTagsWithCounts() {
     .all();
 }
 
-// Tags für eine Menge von Rezept-IDs als Map { recipeId: [{name, slug}] }.
+// Tags for a set of recipe IDs as a map { recipeId: [{name, slug}] }.
 export function tagsForRecipeIds(ids) {
   const map = new Map();
   if (!ids.length) return map;

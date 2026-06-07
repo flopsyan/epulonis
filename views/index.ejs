@@ -2,27 +2,27 @@
 
 <% if (isSearch) { %>
   <div class="page-head">
-    <h1>Suchergebnisse</h1>
+    <h1>Search results</h1>
     <p class="page-sub">
-      <%= recipes.length %> Treffer für „<strong><%= query %></strong>“ ·
-      <a href="/">zurück zur Übersicht</a>
+      <%= recipes.length %> <%= recipes.length === 1 ? 'match' : 'matches' %> for „<strong><%= query %></strong>“ ·
+      <a href="/">back to overview</a>
     </p>
   </div>
 <% } else { %>
   <div class="page-head">
-    <h1><%= activeTag ? activeTag.name : 'Alle Rezepte' %></h1>
+    <h1><%= activeTag ? activeTag.name : 'All recipes' %></h1>
     <p class="page-sub">
       <% if (activeTag) { %>
-        Rezepte mit dem Tag „<strong><%= activeTag.name %></strong>“ · <a href="/">alle anzeigen</a>
+        Recipes tagged „<strong><%= activeTag.name %></strong>“ · <a href="/">show all</a>
       <% } else { %>
-        <%= recipes.length %> <%= recipes.length === 1 ? 'Rezept' : 'Rezepte' %> in deiner Sammlung
+        <%= recipes.length %> <%= recipes.length === 1 ? 'recipe' : 'recipes' %> in your collection
       <% } %>
     </p>
   </div>
 
   <% if (tags && tags.length) { %>
-    <nav class="filter-bar" aria-label="Nach Tags filtern">
-      <a class="chip <%= !activeTag ? 'active' : '' %>" href="/">Alle</a>
+    <nav class="filter-bar" aria-label="Filter by tag">
+      <a class="chip <%= !activeTag ? 'active' : '' %>" href="/">All</a>
       <% tags.forEach((t) => { %>
         <a class="chip <%= activeTag && activeTag.slug === t.slug ? 'active' : '' %>" href="/?tag=<%= t.slug %>">
           <%= t.name %> <span class="chip-count"><%= t.count %></span>
@@ -36,13 +36,13 @@
   <div class="empty-state">
     <div class="empty-emoji">🍳</div>
     <% if (isSearch) { %>
-      <h2>Keine Treffer</h2>
-      <p>Für „<%= query %>“ wurde nichts gefunden – weder im Titel noch im Rezepttext.</p>
-      <a class="btn btn-primary" href="/">Alle Rezepte ansehen</a>
+      <h2>No matches</h2>
+      <p>Nothing found for „<%= query %>“ – neither in the titles nor in the recipe text.</p>
+      <a class="btn btn-primary" href="/">Browse all recipes</a>
     <% } else { %>
-      <h2>Noch keine Rezepte</h2>
-      <p>Lege dein erstes Rezept an – Zutaten, Schritte und Notizen inklusive.</p>
-      <a class="btn btn-primary" href="/neu">+ Erstes Rezept anlegen</a>
+      <h2>No recipes yet</h2>
+      <p>Create your first recipe – ingredients, steps and notes included.</p>
+      <a class="btn btn-primary" href="/new">+ Create first recipe</a>
     <% } %>
   </div>
 <% } else { %>

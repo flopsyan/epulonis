@@ -1,4 +1,4 @@
-// Portions-Skalierung + Live-Abgleich mit dem Vorrat.
+// Servings scaling + live match against the pantry.
 import { normalizeName, pantryStatus, formatAmount } from './units.js';
 
 const article = document.querySelector('.recipe');
@@ -13,11 +13,11 @@ if (article) {
   } catch { pantry = {}; }
 
   const PILL = {
-    ok: ['ok', '✓', 'vorhanden'],
-    available: ['ok', '✓', 'vorhanden'],
-    low: ['low', '≈', 'zu wenig'],
-    unknown: ['unknown', '•', 'vorhanden'],
-    missing: ['missing', '✕', 'fehlt'],
+    ok: ['ok', '✓', 'in stock'],
+    available: ['ok', '✓', 'in stock'],
+    low: ['low', '≈', 'too little'],
+    unknown: ['unknown', '•', 'in stock'],
+    missing: ['missing', '✕', 'missing'],
   };
 
   function applyPill(el, status, have, scaled, unit) {
@@ -28,16 +28,16 @@ if (article) {
 
     let title = '';
     if (status === 'missing') {
-      title = 'Nicht im Vorrat';
+      title = 'Not in pantry';
     } else if (have) {
       const haveTxt =
-        have.amount != null ? `${formatAmount(have.amount)} ${have.unit || ''}`.trim() : 'vorhanden';
+        have.amount != null ? `${formatAmount(have.amount)} ${have.unit || ''}`.trim() : 'in stock';
       if (status === 'low') {
-        title = `Im Vorrat: ${haveTxt} – benötigt ${formatAmount(scaled)} ${unit}`.trim();
+        title = `In pantry: ${haveTxt} – need ${formatAmount(scaled)} ${unit}`.trim();
       } else if (status === 'unknown') {
-        title = `Im Vorrat: ${haveTxt} (andere Einheit, Menge nicht vergleichbar)`;
+        title = `In pantry: ${haveTxt} (different unit, amounts can’t be compared)`;
       } else {
-        title = `Im Vorrat: ${haveTxt}`;
+        title = `In pantry: ${haveTxt}`;
       }
     }
     el.title = title;
@@ -82,6 +82,6 @@ if (article) {
     input.value = formatAmount(currentServings());
   });
 
-  // Initiale Synchronisation (setzt Tooltips & evtl. Rundung)
+  // Initial sync (sets tooltips & any rounding)
   render(currentServings());
 }
