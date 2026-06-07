@@ -8,7 +8,7 @@ services:
       # Host-Port ist über die .env (PORT) anpassbar, Standard 3000
       - "${PORT:-3000}:3000"
     environment:
-      SITE_NAME: ${SITE_NAME:-Rezeptbuch}
+      SITE_NAME: ${SITE_NAME:-Epulonis}
       # Beispieldaten beim allerersten Start einspielen (true/false)
       SEED_DEMO: ${SEED_DEMO:-true}
       NODE_ENV: production

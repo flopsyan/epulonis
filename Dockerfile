@@ -17,7 +17,7 @@ FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     PORT=3000 \
     DATA_DIR=/app/data \
-    SITE_NAME=Rezeptbuch \
+    SITE_NAME=Epulonis \
     SEED_DEMO=true
 
 WORKDIR /app

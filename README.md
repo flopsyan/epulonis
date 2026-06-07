@@ -1,7 +1,7 @@
-# 🍲 Rezeptplattform
+# Epulonis
 
-Eine **selbstgehostete Rezeptplattform** zum Sammeln, Durchsuchen und Kochen eigener Rezepte –
-mit Portions-Rechner und Live-Abgleich gegen den eigenen Vorrat. Läuft mit einem einzigen
+**Epulonis** ist eine **selbstgehostete Rezeptplattform** zum Sammeln, Durchsuchen und Kochen eigener
+Rezepte – mit Portions-Rechner und Live-Abgleich gegen den eigenen Vorrat. Läuft mit einem einzigen
 `docker compose up` und speichert alles dauerhaft in einer SQLite-Datenbank.
 
 ![Übersichtsseite](docs/screenshot-uebersicht.png)
@@ -38,8 +38,8 @@ mit Portions-Rechner und Live-Abgleich gegen den eigenen Vorrat. Läuft mit eine
 Voraussetzung: Docker und Docker Compose.
 
 ```bash
-git clone <dieses-repo> rezeptplattform
-cd rezeptplattform
+git clone git@github.com:flopsyan/epulonis.git
+cd epulonis
 
 # optional: Einstellungen anpassen
 cp .env.example .env
@@ -86,7 +86,7 @@ Alle Einstellungen erfolgen über Umgebungsvariablen (siehe `.env.example`):
 | Variable     | Standard     | Bedeutung |
 | ------------ | ------------ | --------- |
 | `PORT`       | `3000`       | Port, unter dem die Plattform läuft |
-| `SITE_NAME`  | `Rezeptbuch` | Name in Kopfzeile und Browser-Tab |
+| `SITE_NAME`  | `Epulonis`   | Name in Kopfzeile und Browser-Tab |
 | `SEED_DEMO`  | `true`       | Beim allerersten Start Beispieldaten anlegen |
 | `DATA_DIR`   | `./data`     | Speicherort der SQLite-Datenbank (ohne Docker) |
 
@@ -123,7 +123,7 @@ Alle Inhalte liegen in einer einzigen SQLite-Datei.
 ## Projektstruktur
 
 ```
-rezeptplattform/
+epulonis/
 ├── src/
 │   ├── server.js          # Express-App, Einstieg
 │   ├── db.js              # SQLite-Verbindung & Schema

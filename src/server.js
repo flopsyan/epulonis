@@ -19,7 +19,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(projectRoot, 'views'));
 
 // In Templates verfügbare Helfer & Konstanten
-app.locals.siteName = process.env.SITE_NAME || 'Rezeptbuch';
+app.locals.siteName = process.env.SITE_NAME || 'Epulonis';
 app.locals.formatAmount = formatAmount;
 app.locals.formatTime = formatTime;
 
@@ -69,5 +69,5 @@ if (process.env.SEED_DEMO !== 'false') {
 
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => {
-  console.log(`🍲 ${app.locals.siteName} läuft auf http://localhost:${port}`);
+  console.log(`${app.locals.siteName} läuft auf http://localhost:${port}`);
 });
