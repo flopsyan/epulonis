@@ -1,7 +1,7 @@
 # Dependencies
 node_modules/
 
-# Laufzeitdaten / Datenbank (persistente Nutzerdaten gehören nicht ins Repo)
+# Runtime data / database
 data/
 *.sqlite
 *.sqlite3
@@ -9,7 +9,7 @@ data/
 *.db-shm
 *.db-wal
 
-# Umgebungsvariablen
+# Environment variables
 .env
 
 # Logs
@@ -22,3 +22,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Docker
+docker-compose.override.yml
