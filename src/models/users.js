@@ -33,7 +33,12 @@ const MIN_PASSWORD = 4;
 // Public projection (no password material) for sessions and templates.
 export function publicUser(u) {
   if (!u) return null;
-  return { id: u.id, username: u.username, display_name: u.display_name, avatar: u.avatar };
+  return { id: u.id, username: u.username, display_name: u.display_name, avatar: u.avatar, is_admin: !!u.is_admin };
+}
+
+// True if the (full DB) user row has the admin flag.
+export function isAdmin(user) {
+  return !!(user && user.is_admin);
 }
 
 export function countUsers() {
@@ -50,11 +55,11 @@ export function getUserByUsername(username) {
 
 export function listUsers() {
   return db
-    .prepare('SELECT id, username, display_name, avatar, created_at FROM users ORDER BY username COLLATE NOCASE ASC')
+    .prepare('SELECT id, username, display_name, avatar, is_admin, created_at FROM users ORDER BY username COLLATE NOCASE ASC')
     .all();
 }
 
-export function createUser({ username, password, display_name, avatar } = {}) {
+export function createUser({ username, password, display_name, avatar, is_admin } = {}) {
   const uname = String(username || '').trim();
   if (!USERNAME_RE.test(uname)) return { error: 'invalid_username' };
   if (String(password || '').length < MIN_PASSWORD) return { error: 'weak_password' };
@@ -63,10 +68,10 @@ export function createUser({ username, password, display_name, avatar } = {}) {
   const { salt, hash } = hashPassword(password);
   const info = db
     .prepare(
-      `INSERT INTO users (username, display_name, pass_hash, pass_salt, avatar)
-       VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO users (username, display_name, pass_hash, pass_salt, avatar, is_admin)
+       VALUES (?, ?, ?, ?, ?, ?)`
     )
-    .run(uname, String(display_name || '').trim() || uname, hash, salt, cleanAvatar(avatar));
+    .run(uname, String(display_name || '').trim() || uname, hash, salt, cleanAvatar(avatar), is_admin ? 1 : 0);
   return { user: getUserById(info.lastInsertRowid) };
 }
 
@@ -91,6 +96,12 @@ export function changePassword(id, newPassword) {
 // the author_name snapshot remains, so they show a "deleted user" creator.
 export const deleteUser = db.transaction((id) => {
   if (countUsers() <= 1) return { error: 'last_user' };
+  const target = getUserById(id);
+  // Never remove the last admin, or nobody could manage accounts anymore.
+  if (target && target.is_admin) {
+    const admins = db.prepare('SELECT COUNT(*) AS c FROM users WHERE is_admin = 1').get().c;
+    if (admins <= 1) return { error: 'last_admin' };
+  }
   db.prepare('UPDATE recipes SET author_id = NULL WHERE author_id = ?').run(id);
   db.prepare('DELETE FROM users WHERE id = ?').run(id);
   return { ok: true };

@@ -27,6 +27,7 @@ db.exec(`
     pass_hash     TEXT NOT NULL,
     pass_salt     TEXT NOT NULL,
     avatar        TEXT NOT NULL DEFAULT '',
+    is_admin      INTEGER NOT NULL DEFAULT 0,
     created_at    TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -119,6 +120,12 @@ if (!hasColumn('recipes', 'author_name')) {
        )
      WHERE author_id IS NOT NULL
   `);
+}
+if (!hasColumn('users', 'is_admin')) {
+  db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0');
+  // Promote the first (bootstrapped) account so existing installs keep an admin
+  // who can manage user accounts.
+  db.exec('UPDATE users SET is_admin = 1 WHERE id = (SELECT MIN(id) FROM users)');
 }
 
 export function getMeta(key) {

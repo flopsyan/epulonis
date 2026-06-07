@@ -12,6 +12,7 @@ import { allPantry, pantryMap, upsertPantry, deletePantry } from '../models/pant
 import { normalizeName, pantryStatus } from '../lib/units.js';
 import {
   requireAuth,
+  requireAdmin,
   loginPossible,
   authenticate,
   setSessionCookie,
@@ -149,7 +150,7 @@ router.get('/settings', requireAuth, (req, res) => {
   });
 });
 
-router.post('/settings/users', requireAuth, (req, res) => {
+router.post('/settings/users', requireAdmin, (req, res) => {
   const r = createUser({
     username: req.body.username,
     password: req.body.password,
@@ -159,7 +160,7 @@ router.post('/settings/users', requireAuth, (req, res) => {
   res.redirect(`/settings?created=${encodeURIComponent(r.user.username)}`);
 });
 
-router.post('/settings/users/:id/delete', requireAuth, (req, res) => {
+router.post('/settings/users/:id/delete', requireAdmin, (req, res) => {
   const r = deleteUser(Number(req.params.id));
   if (r.error) return res.redirect(`/settings?error=${encodeURIComponent(r.error)}`);
   // If you deleted your own account, the session is now invalid.

@@ -117,6 +117,7 @@ export function attachAuth(req, res, next) {
   req.user = user;
   res.locals.user = publicUser(user);
   res.locals.authed = !!user;
+  res.locals.isAdmin = !!(user && user.is_admin);
   res.locals.loginAvailable = loginPossible();
   next();
 }
@@ -126,6 +127,23 @@ export function requireAuth(req, res, next) {
   if (currentUser(req)) return next();
   if (!loginPossible()) return res.redirect('/');
   return res.redirect(`/login?next=${encodeURIComponent(req.originalUrl || '/')}`);
+}
+
+// Middleware: guard an admin-only page route (user management). Logged-in
+// non-admins get a 403; logged-out visitors are sent to the login page first.
+export function requireAdmin(req, res, next) {
+  const user = currentUser(req);
+  if (!user) {
+    if (!loginPossible()) return res.redirect('/');
+    return res.redirect(`/login?next=${encodeURIComponent(req.originalUrl || '/')}`);
+  }
+  if (!user.is_admin) {
+    return res.status(403).render('error', {
+      title: req.t('title_error'),
+      message: req.t('err_admin_only'),
+    });
+  }
+  return next();
 }
 
 // Middleware: guard a mutating API route (JSON instead of a redirect).
@@ -141,7 +159,7 @@ export function bootstrapAdmin() {
   if (!password) return; // no bootstrap -> read-only until an account exists
   const username = (process.env.AUTH_USER || 'admin').trim();
   if (getUserByUsername(username)) return;
-  const res = createUser({ username, password, display_name: username });
+  const res = createUser({ username, password, display_name: username, is_admin: 1 });
   if (res.user) console.log(`Bootstrapped admin account "${username}" from AUTH_PASSWORD.`);
   else console.error('Could not bootstrap admin account:', res.error);
 }

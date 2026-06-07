@@ -38,10 +38,10 @@
       <li class="user-row">
         <%- include('partials/avatar', { avatarUser: u, avatarClass: 'avatar-md' }) %>
         <span class="user-row-text">
-          <span class="user-row-name"><%= u.display_name || u.username %><% if (u.id === locals.user.id) { %> <span class="you-badge"><%= t('you') %></span><% } %></span>
+          <span class="user-row-name"><%= u.display_name || u.username %><% if (u.is_admin) { %> <span class="role-badge"><%= t('role_admin') %></span><% } %><% if (u.id === locals.user.id) { %> <span class="you-badge"><%= t('you') %></span><% } %></span>
           <span class="user-row-sub">@<%= u.username %></span>
         </span>
-        <% if (users.length > 1) { %>
+        <% if (locals.isAdmin && users.length > 1) { %>
           <form method="post" action="/settings/users/<%= u.id %>/delete"
                 onsubmit="return confirm('<%= u.id === locals.user.id ? t('confirm_delete_self') : t('confirm_delete_user') %>');">
             <button type="submit" class="icon-btn danger" title="<%= t('p_remove') %>">🗑</button>
@@ -51,6 +51,7 @@
     <% }) %>
   </ul>
 
+  <% if (locals.isAdmin) { %>
   <h3 class="subhead"><%= t('add_user') %></h3>
   <form method="post" action="/settings/users" class="user-add-form" autocomplete="off">
     <div class="grid-2">
@@ -71,6 +72,7 @@
       <button type="submit" class="btn btn-primary"><%= t('add_user') %></button>
     </div>
   </form>
+  <% } %>
 </section>
 
 <%- include('partials/footer') %>
