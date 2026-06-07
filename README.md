@@ -114,8 +114,8 @@ Alle Einstellungen erfolgen über Umgebungsvariablen (siehe `.env.example`):
 
 Alle Inhalte liegen in einer einzigen SQLite-Datei.
 
-- **Mit Docker:** im Volume `rezept-daten` (Pfad im Container: `/app/data/rezepte.sqlite`).
-  Backup z. B. mit `docker run --rm -v rezept-daten:/data -v "$PWD":/backup busybox tar czf /backup/rezepte-backup.tgz -C /data .`
+- **Mit Docker:** im Volume `epulonis_rezept-daten` (Pfad im Container: `/app/data/rezepte.sqlite`).
+  Backup z. B. mit `docker run --rm -v epulonis_rezept-daten:/data -v "$PWD":/backup busybox tar czf /backup/rezepte-backup.tgz -C /data .`
 - **Ohne Docker:** im Ordner `data/` (per `DATA_DIR` änderbar). Einfach den Ordner sichern.
 
 ---

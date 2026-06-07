@@ -1,8 +1,11 @@
+# Fester Projektname, damit Volumes & Container unabhängig vom Ordnernamen heißen
+name: epulonis
+
 services:
-  rezeptplattform:
+  epulonis:
     build: .
-    image: rezeptplattform:latest
-    container_name: rezeptplattform
+    image: epulonis:latest
+    container_name: epulonis
     restart: unless-stopped
     ports:
       # Host-Port ist über die .env (PORT) anpassbar, Standard 3000
