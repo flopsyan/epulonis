@@ -2,6 +2,12 @@
 const input = document.getElementById('search-input');
 const box = document.getElementById('search-results');
 
+const I18N = (() => {
+  try { return JSON.parse(document.getElementById('i18n')?.textContent || '{}'); }
+  catch { return {}; }
+})();
+const t = (k) => (k in I18N ? I18N[k] : k);
+
 if (input && box) {
   let items = [];
   let active = -1;
@@ -42,8 +48,8 @@ if (input && box) {
     title.textContent = r.title;
     const sub = document.createElement('span');
     sub.className = 'sr-sub';
-    const tagText = (r.tags || []).map((t) => t.name).slice(0, 3).join(' · ');
-    sub.textContent = r.titleMatch ? (tagText || r.difficulty || '') : 'Match in recipe text';
+    const tagText = (r.tags || []).map((t2) => t2.name).slice(0, 3).join(' · ');
+    sub.textContent = r.titleMatch ? (tagText || r.difficulty || '') : t('match_in_text');
     text.append(title, sub);
     a.appendChild(text);
     return a;
@@ -54,7 +60,7 @@ if (input && box) {
     if (!results.length) {
       const empty = document.createElement('div');
       empty.className = 'sr-empty';
-      empty.textContent = 'No matches';
+      empty.textContent = t('no_matches');
       box.appendChild(empty);
       box.removeAttribute('hidden');
       items = []; active = -1;

@@ -51,7 +51,7 @@ router.get('/', (req, res) => {
   }
 
   res.render('index', {
-    title: q ? `Search: ${q}` : 'All recipes',
+    title: q ? `${req.t('title_search')} ${q}` : req.t('all_recipes'),
     recipes,
     tags: allTagsWithCounts(),
     activeTag,
@@ -63,13 +63,13 @@ router.get('/', (req, res) => {
 // --- New recipe ------------------------------------------------------------
 router.get('/new', (req, res) => {
   res.render('recipe-form', {
-    title: 'New recipe',
+    title: req.t('new_recipe'),
     mode: 'create',
     formAction: '/recipe',
     difficulties: DIFFICULTIES,
     recipe: {
       title: '', description: '', image_url: '', servings: 4,
-      servings_unit: 'Servings', prep_time: '', cook_time: '',
+      servings_unit: req.t('default_serving_unit'), prep_time: '', cook_time: '',
       difficulty: 'Medium', notes: '',
       ingredients: [], steps: [], tags: [],
     },
@@ -84,9 +84,9 @@ router.post('/recipe', (req, res) => {
 // --- Edit recipe -----------------------------------------------------------
 router.get('/recipe/:slug/edit', (req, res) => {
   const recipe = getRecipeBySlug(req.params.slug);
-  if (!recipe) return res.status(404).render('404', { title: 'Not found' });
+  if (!recipe) return res.status(404).render('404', { title: req.t('title_not_found') });
   res.render('recipe-form', {
-    title: `Edit: ${recipe.title}`,
+    title: `${req.t('title_edit')} ${recipe.title}`,
     mode: 'edit',
     formAction: `/recipe/${recipe.slug}`,
     difficulties: DIFFICULTIES,
@@ -96,7 +96,7 @@ router.get('/recipe/:slug/edit', (req, res) => {
 
 router.post('/recipe/:slug', (req, res) => {
   const recipe = getRecipeBySlug(req.params.slug);
-  if (!recipe) return res.status(404).render('404', { title: 'Not found' });
+  if (!recipe) return res.status(404).render('404', { title: req.t('title_not_found') });
   const slug = updateRecipe(recipe.id, normalizeRecipeBody(req.body));
   res.redirect(`/recipe/${slug}`);
 });
@@ -110,7 +110,7 @@ router.post('/recipe/:slug/delete', (req, res) => {
 // --- Recipe detail page ----------------------------------------------------
 router.get('/recipe/:slug', (req, res) => {
   const recipe = getRecipeBySlug(req.params.slug);
-  if (!recipe) return res.status(404).render('404', { title: 'Not found' });
+  if (!recipe) return res.status(404).render('404', { title: req.t('title_not_found') });
 
   const pantry = pantryMap();
   // Compute the initial status on the server (works without JavaScript too);
@@ -132,7 +132,7 @@ router.get('/recipe/:slug', (req, res) => {
 // --- Pantry ----------------------------------------------------------------
 router.get('/pantry', (req, res) => {
   res.render('pantry', {
-    title: 'Pantry',
+    title: req.t('pantry_title'),
     items: allPantry(),
   });
 });

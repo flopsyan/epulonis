@@ -2,27 +2,35 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <span><strong><%= siteName %></strong> · your self-hosted recipe collection</span>
+      <span><strong><%= siteName %></strong> · <%= t('footer_tagline') %></span>
 
       <div class="footer-right">
         <span class="footer-links">
-          <a href="/">All recipes</a>
-          <a href="/pantry">Pantry</a>
-          <a href="/new">Add recipe</a>
+          <a href="/"><%= t('footer_all') %></a>
+          <a href="/pantry"><%= t('footer_pantry') %></a>
+          <a href="/new"><%= t('footer_add') %></a>
         </span>
-        <div class="theme-switch" role="group" aria-label="Color theme">
-          <button type="button" class="theme-btn" data-theme-choice="system">System</button>
-          <button type="button" class="theme-btn" data-theme-choice="light">Light</button>
-          <button type="button" class="theme-btn" data-theme-choice="dark">Dark</button>
+
+        <div class="switch lang-switch" role="group" aria-label="<%= t('lang_aria') %>">
+          <button type="button" class="switch-btn <%= lang === 'en' ? 'active' : '' %>" data-lang-choice="en">EN</button>
+          <button type="button" class="switch-btn <%= lang === 'de' ? 'active' : '' %>" data-lang-choice="de">DE</button>
+        </div>
+
+        <div class="switch theme-switch" role="group" aria-label="<%= t('theme_aria') %>">
+          <button type="button" class="switch-btn" data-theme-choice="system"><%= t('theme_system') %></button>
+          <button type="button" class="switch-btn" data-theme-choice="light"><%= t('theme_light') %></button>
+          <button type="button" class="switch-btn" data-theme-choice="dark"><%= t('theme_dark') %></button>
         </div>
       </div>
     </div>
   </footer>
 
-  <script type="module" src="/static/js/theme.js"></script>
-  <script type="module" src="/static/js/search.js"></script>
+  <script type="application/json" id="i18n"><%- i18nJson %></script>
+  <script type="module" src="/static/js/lang.js?v=<%= assetVersion %>"></script>
+  <script type="module" src="/static/js/theme.js?v=<%= assetVersion %>"></script>
+  <script type="module" src="/static/js/search.js?v=<%= assetVersion %>"></script>
   <% if (typeof pageScript !== 'undefined' && pageScript) { %>
-    <script type="module" src="/static/js/<%= pageScript %>"></script>
+    <script type="module" src="/static/js/<%= pageScript %>?v=<%= assetVersion %>"></script>
   <% } %>
 </body>
 </html>

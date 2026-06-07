@@ -7,6 +7,7 @@ import { seedDemo } from './seed.js';
 import pagesRouter from './routes/pages.js';
 import apiRouter from './routes/api.js';
 import { formatAmount, formatTime } from './lib/format.js';
+import { langFromCookie, makeT, clientStrings } from './lib/i18n.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
@@ -22,6 +23,8 @@ app.set('views', path.join(projectRoot, 'views'));
 app.locals.siteName = process.env.SITE_NAME || 'Epulonis';
 app.locals.formatAmount = formatAmount;
 app.locals.formatTime = formatTime;
+// Changes on every (re)start -> busts the browser cache for CSS/JS after deploys
+app.locals.assetVersion = process.env.ASSET_VERSION || String(Date.now());
 
 // Body parsers for forms and JSON
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
@@ -33,8 +36,15 @@ app.use(
   express.static(path.join(projectRoot, 'public'), { maxAge: '1h' })
 );
 
-// For navigation & search box in all views
+// Language (from cookie), translations, navigation & search box for all views
 app.use((req, res, next) => {
+  const lang = langFromCookie(req.headers.cookie);
+  req.lang = lang;
+  req.t = makeT(lang);
+  res.locals.lang = lang;
+  res.locals.t = req.t;
+  // string table for the browser modules, safe to embed in a <script> tag
+  res.locals.i18nJson = JSON.stringify(clientStrings(lang)).replace(/</g, '\\u003c');
   res.locals.currentPath = req.path;
   res.locals.searchQuery = req.query.q || '';
   next();
@@ -46,15 +56,16 @@ app.use('/', pagesRouter);
 
 // 404
 app.use((req, res) => {
-  res.status(404).render('404', { title: 'Not found' });
+  res.status(404).render('404', { title: req.t('title_not_found') });
 });
 
 // Error handling
 app.use((err, req, res, next) => {
   console.error(err);
+  const t = req.t || makeT('en');
   res.status(500).render('error', {
-    title: 'Error',
-    message: process.env.NODE_ENV === 'production' ? 'Something went wrong.' : String(err && err.stack ? err.stack : err),
+    title: t('title_error'),
+    message: process.env.NODE_ENV === 'production' ? '' : String(err && err.stack ? err.stack : err),
   });
 });
 

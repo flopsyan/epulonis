@@ -1,22 +1,28 @@
 // Dynamic ingredient/step rows + image preview for the recipe form.
 
+const I18N = (() => {
+  try { return JSON.parse(document.getElementById('i18n')?.textContent || '{}'); }
+  catch { return {}; }
+})();
+const t = (k) => (k in I18N ? I18N[k] : k);
+
 const ingredientRows = document.getElementById('ingredient-rows');
 const stepRows = document.getElementById('step-rows');
 
 function el(html) {
-  const t = document.createElement('template');
-  t.innerHTML = html.trim();
-  return t.content.firstElementChild;
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html.trim();
+  return tpl.content.firstElementChild;
 }
 
 function ingredientRow() {
   return el(`
     <div class="row ingredient-row">
-      <input type="text" class="cell-amount" data-field="amount" inputmode="decimal" placeholder="Amount" />
-      <input type="text" class="cell-unit" data-field="unit" placeholder="Unit" list="unit-list" />
-      <input type="text" class="cell-name" data-field="name" placeholder="Ingredient" />
-      <input type="text" class="cell-note" data-field="note" placeholder="Note (optional)" />
-      <button type="button" class="row-remove" aria-label="Remove ingredient">✕</button>
+      <input type="text" class="cell-amount" data-field="amount" inputmode="decimal" placeholder="${t('ph_amount')}" />
+      <input type="text" class="cell-unit" data-field="unit" placeholder="${t('ph_unit')}" list="unit-list" />
+      <input type="text" class="cell-name" data-field="name" placeholder="${t('ph_ingredient')}" />
+      <input type="text" class="cell-note" data-field="note" placeholder="${t('ph_note')}" />
+      <button type="button" class="row-remove" aria-label="${t('remove_ingredient')}">✕</button>
     </div>`);
 }
 
@@ -24,8 +30,8 @@ function stepRow() {
   return el(`
     <div class="row step-row">
       <span class="step-num"></span>
-      <textarea data-field="step" name="steps[]" rows="2" placeholder="Describe the step …"></textarea>
-      <button type="button" class="row-remove" aria-label="Remove step">✕</button>
+      <textarea data-field="step" name="steps[]" rows="2" placeholder="${t('ph_step')}"></textarea>
+      <button type="button" class="row-remove" aria-label="${t('remove_step')}">✕</button>
     </div>`);
 }
 

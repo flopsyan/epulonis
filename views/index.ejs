@@ -2,30 +2,31 @@
 
 <% if (isSearch) { %>
   <div class="page-head">
-    <h1>Search results</h1>
+    <h1><%= t('search_results') %></h1>
     <p class="page-sub">
-      <%= recipes.length %> <%= recipes.length === 1 ? 'match' : 'matches' %> for „<strong><%= query %></strong>“ ·
-      <a href="/">back to overview</a>
+      <%= recipes.length %> <%= recipes.length === 1 ? t('match_one') : t('match_many') %>
+      <%= t('for_query') %> „<strong><%= query %></strong>“ ·
+      <a href="/"><%= t('back_overview') %></a>
     </p>
   </div>
 <% } else { %>
   <div class="page-head">
-    <h1><%= activeTag ? activeTag.name : 'All recipes' %></h1>
+    <h1><%= activeTag ? activeTag.name : t('all_recipes') %></h1>
     <p class="page-sub">
       <% if (activeTag) { %>
-        Recipes tagged „<strong><%= activeTag.name %></strong>“ · <a href="/">show all</a>
+        <%= t('tagged_with') %> „<strong><%= activeTag.name %></strong>“ · <a href="/"><%= t('show_all') %></a>
       <% } else { %>
-        <%= recipes.length %> <%= recipes.length === 1 ? 'recipe' : 'recipes' %> in your collection
+        <%= recipes.length %> <%= recipes.length === 1 ? t('recipe_one') : t('recipe_many') %> <%= t('in_collection') %>
       <% } %>
     </p>
   </div>
 
   <% if (tags && tags.length) { %>
-    <nav class="filter-bar" aria-label="Filter by tag">
-      <a class="chip <%= !activeTag ? 'active' : '' %>" href="/">All</a>
-      <% tags.forEach((t) => { %>
-        <a class="chip <%= activeTag && activeTag.slug === t.slug ? 'active' : '' %>" href="/?tag=<%= t.slug %>">
-          <%= t.name %> <span class="chip-count"><%= t.count %></span>
+    <nav class="filter-bar" aria-label="<%= t('filter_aria') %>">
+      <a class="chip <%= !activeTag ? 'active' : '' %>" href="/"><%= t('chip_all') %></a>
+      <% tags.forEach((tag) => { %>
+        <a class="chip <%= activeTag && activeTag.slug === tag.slug ? 'active' : '' %>" href="/?tag=<%= tag.slug %>">
+          <%= tag.name %> <span class="chip-count"><%= tag.count %></span>
         </a>
       <% }) %>
     </nav>
@@ -36,13 +37,13 @@
   <div class="empty-state">
     <div class="empty-emoji">🍳</div>
     <% if (isSearch) { %>
-      <h2>No matches</h2>
-      <p>Nothing found for „<%= query %>“ – neither in the titles nor in the recipe text.</p>
-      <a class="btn btn-primary" href="/">Browse all recipes</a>
+      <h2><%= t('empty_no_matches') %></h2>
+      <p><%= t('nothing_found_1') %> „<%= query %>“ <%= t('nothing_found_2') %></p>
+      <a class="btn btn-primary" href="/"><%= t('browse_all') %></a>
     <% } else { %>
-      <h2>No recipes yet</h2>
-      <p>Create your first recipe – ingredients, steps and notes included.</p>
-      <a class="btn btn-primary" href="/new">+ Create first recipe</a>
+      <h2><%= t('empty_no_recipes') %></h2>
+      <p><%= t('empty_no_recipes_text') %></p>
+      <a class="btn btn-primary" href="/new"><%= t('create_first') %></a>
     <% } %>
   </div>
 <% } else { %>

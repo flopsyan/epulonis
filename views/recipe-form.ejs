@@ -1,97 +1,97 @@
 <%- include('partials/header') %>
 
-<p class="breadcrumb"><a href="/">← All recipes</a></p>
+<p class="breadcrumb"><a href="/"><%= t('back_all') %></a></p>
 
 <div class="page-head">
-  <h1><%= mode === 'edit' ? 'Edit recipe' : 'New recipe' %></h1>
-  <p class="page-sub">Every field except the title is optional – add as much or as little as you like.</p>
+  <h1><%= mode === 'edit' ? t('edit_recipe') : t('new_recipe') %></h1>
+  <p class="page-sub"><%= t('form_sub') %></p>
 </div>
 
 <form class="recipe-form" method="post" action="<%= formAction %>">
   <section class="form-card">
-    <h2 class="form-section-title">Basics</h2>
+    <h2 class="form-section-title"><%= t('basics') %></h2>
 
     <div class="field">
-      <label for="title">Title <span class="req">*</span></label>
+      <label for="title"><%= t('f_title') %> <span class="req">*</span></label>
       <input type="text" id="title" name="title" required maxlength="200"
-             placeholder="e.g. Moist Lemon Cake" value="<%= recipe.title %>" />
+             placeholder="<%= t('f_title_ph') %>" value="<%= recipe.title %>" />
     </div>
 
     <div class="field">
-      <label for="description">Short description</label>
+      <label for="description"><%= t('f_desc') %></label>
       <textarea id="description" name="description" rows="2"
-                placeholder="A sentence or two about the dish …"><%= recipe.description %></textarea>
+                placeholder="<%= t('f_desc_ph') %>"><%= recipe.description %></textarea>
     </div>
 
     <div class="field">
-      <label for="image_url">Image URL</label>
+      <label for="image_url"><%= t('f_image') %></label>
       <input type="url" id="image_url" name="image_url" placeholder="https://…/image.jpg"
              value="<%= recipe.image_url %>" />
-      <p class="hint">Link to an image from the web. Leave empty for an automatic placeholder.</p>
+      <p class="hint"><%= t('f_image_hint') %></p>
       <div class="image-preview" id="image-preview" <%= recipe.image_url ? '' : 'hidden' %>>
-        <img id="image-preview-img" src="<%= recipe.image_url %>" alt="Preview" onerror="this.closest('.image-preview').setAttribute('hidden','')" />
+        <img id="image-preview-img" src="<%= recipe.image_url %>" alt="<%= t('img_preview_alt') %>" onerror="this.closest('.image-preview').setAttribute('hidden','')" />
       </div>
     </div>
 
     <div class="grid-2">
       <div class="field">
-        <label for="servings">Servings</label>
+        <label for="servings"><%= t('f_servings') %></label>
         <input type="number" id="servings" name="servings" min="1" step="0.5"
                value="<%= recipe.servings %>" />
       </div>
       <div class="field">
-        <label for="servings_unit">Serving unit</label>
+        <label for="servings_unit"><%= t('f_serving_unit') %></label>
         <input type="text" id="servings_unit" name="servings_unit"
-               placeholder="Servings / Slices / Glasses …" value="<%= recipe.servings_unit %>" />
+               placeholder="<%= t('f_serving_unit_ph') %>" value="<%= recipe.servings_unit %>" />
       </div>
     </div>
 
     <div class="grid-3">
       <div class="field">
-        <label for="prep_time">Prep (min)</label>
+        <label for="prep_time"><%= t('f_prep') %></label>
         <input type="number" id="prep_time" name="prep_time" min="0" step="1"
                value="<%= recipe.prep_time %>" />
       </div>
       <div class="field">
-        <label for="cook_time">Cook (min)</label>
+        <label for="cook_time"><%= t('f_cook') %></label>
         <input type="number" id="cook_time" name="cook_time" min="0" step="1"
                value="<%= recipe.cook_time %>" />
       </div>
       <div class="field">
-        <label for="difficulty">Difficulty</label>
+        <label for="difficulty"><%= t('difficulty') %></label>
         <select id="difficulty" name="difficulty">
           <% difficulties.forEach((d) => { %>
-            <option value="<%= d %>" <%= recipe.difficulty === d ? 'selected' : '' %>><%= d %></option>
+            <option value="<%= d %>" <%= recipe.difficulty === d ? 'selected' : '' %>><%= t('diff_' + d) %></option>
           <% }) %>
         </select>
       </div>
     </div>
 
     <div class="field">
-      <label for="tags">Tags</label>
+      <label for="tags"><%= t('f_tags') %></label>
       <input type="text" id="tags" name="tags"
-             placeholder="Cake, Dessert, Vegetarian …"
-             value="<%= (recipe.tags || []).map((t) => t.name || t).join(', ') %>" />
-      <p class="hint">Comma-separated. Tags act as filters on the overview page.</p>
+             placeholder="<%= t('f_tags_ph') %>"
+             value="<%= (recipe.tags || []).map((tag) => tag.name || tag).join(', ') %>" />
+      <p class="hint"><%= t('f_tags_hint') %></p>
     </div>
   </section>
 
   <section class="form-card">
     <div class="form-section-head">
-      <h2 class="form-section-title">Ingredients</h2>
-      <button type="button" class="btn btn-ghost btn-sm" id="add-ingredient">+ Ingredient</button>
+      <h2 class="form-section-title"><%= t('ingredients') %></h2>
+      <button type="button" class="btn btn-ghost btn-sm" id="add-ingredient"><%= t('add_ingredient') %></button>
     </div>
-    <p class="hint">Amount and unit are optional (e.g. “Salt, to taste”). The amount scales automatically with the servings later.</p>
+    <p class="hint"><%= t('ing_hint') %></p>
 
     <div class="rows ingredient-rows" id="ingredient-rows">
       <% recipe.ingredients.forEach((ing) => { %>
         <div class="row ingredient-row">
-          <input type="text" class="cell-amount" data-field="amount" inputmode="decimal" placeholder="Amount"
+          <input type="text" class="cell-amount" data-field="amount" inputmode="decimal" placeholder="<%= t('ph_amount') %>"
                  value="<%= ing.amount === null || ing.amount === undefined ? '' : ing.amount %>" />
-          <input type="text" class="cell-unit" data-field="unit" placeholder="Unit" list="unit-list" value="<%= ing.unit %>" />
-          <input type="text" class="cell-name" data-field="name" placeholder="Ingredient" value="<%= ing.name %>" />
-          <input type="text" class="cell-note" data-field="note" placeholder="Note (optional)" value="<%= ing.note %>" />
-          <button type="button" class="row-remove" aria-label="Remove ingredient">✕</button>
+          <input type="text" class="cell-unit" data-field="unit" placeholder="<%= t('ph_unit') %>" list="unit-list" value="<%= ing.unit %>" />
+          <input type="text" class="cell-name" data-field="name" placeholder="<%= t('ph_ingredient') %>" value="<%= ing.name %>" />
+          <input type="text" class="cell-note" data-field="note" placeholder="<%= t('ph_note') %>" value="<%= ing.note %>" />
+          <button type="button" class="row-remove" aria-label="<%= t('remove_ingredient') %>">✕</button>
         </div>
       <% }) %>
     </div>
@@ -99,33 +99,33 @@
 
   <section class="form-card">
     <div class="form-section-head">
-      <h2 class="form-section-title">Instructions</h2>
-      <button type="button" class="btn btn-ghost btn-sm" id="add-step">+ Step</button>
+      <h2 class="form-section-title"><%= t('instructions') %></h2>
+      <button type="button" class="btn btn-ghost btn-sm" id="add-step"><%= t('add_step') %></button>
     </div>
 
     <div class="rows step-rows" id="step-rows">
       <% recipe.steps.forEach((s) => { %>
         <div class="row step-row">
           <span class="step-num"></span>
-          <textarea data-field="step" name="steps[]" rows="2" placeholder="Describe the step …"><%= s.text || s %></textarea>
-          <button type="button" class="row-remove" aria-label="Remove step">✕</button>
+          <textarea data-field="step" name="steps[]" rows="2" placeholder="<%= t('ph_step') %>"><%= s.text || s %></textarea>
+          <button type="button" class="row-remove" aria-label="<%= t('remove_step') %>">✕</button>
         </div>
       <% }) %>
     </div>
   </section>
 
   <section class="form-card">
-    <h2 class="form-section-title">Notes</h2>
+    <h2 class="form-section-title"><%= t('notes') %></h2>
     <div class="field">
-      <label for="notes" class="sr-only">Notes</label>
+      <label for="notes" class="sr-only"><%= t('notes') %></label>
       <textarea id="notes" name="notes" rows="3"
-                placeholder="e.g. Put the chicken breast in the fridge the day before …"><%= recipe.notes %></textarea>
+                placeholder="<%= t('f_notes_ph') %>"><%= recipe.notes %></textarea>
     </div>
   </section>
 
   <div class="form-actions">
-    <a class="btn btn-ghost" href="<%= mode === 'edit' ? '/recipe/' + recipe.slug : '/' %>">Cancel</a>
-    <button type="submit" class="btn btn-primary"><%= mode === 'edit' ? 'Save changes' : 'Save recipe' %></button>
+    <a class="btn btn-ghost" href="<%= mode === 'edit' ? '/recipe/' + recipe.slug : '/' %>"><%= t('cancel') %></a>
+    <button type="submit" class="btn btn-primary"><%= mode === 'edit' ? t('save_changes') : t('save_recipe') %></button>
   </div>
 </form>
 

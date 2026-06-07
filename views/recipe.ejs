@@ -4,17 +4,17 @@
   // Initial render of the pantry pill (JS recomputes live).
   function pill(status) {
     switch (status) {
-      case 'ok':        return { cls: 'ok',      icon: '✓', label: 'in stock' };
-      case 'available': return { cls: 'ok',      icon: '✓', label: 'in stock' };
-      case 'low':       return { cls: 'low',     icon: '≈', label: 'too little' };
-      case 'unknown':   return { cls: 'unknown', icon: '•', label: 'in stock' };
-      default:          return { cls: 'missing', icon: '✕', label: 'missing' };
+      case 'ok':
+      case 'available': return { cls: 'ok', icon: '✓', label: t('legend_ok') };
+      case 'low':       return { cls: 'low', icon: '≈', label: t('legend_low') };
+      case 'unknown':   return { cls: 'unknown', icon: '•', label: t('legend_ok') };
+      default:          return { cls: 'missing', icon: '✕', label: t('legend_missing') };
     }
   }
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
 %>
 
-<p class="breadcrumb"><a href="/">← All recipes</a></p>
+<p class="breadcrumb"><a href="/"><%= t('back_all') %></a></p>
 
 <article class="recipe" data-base-servings="<%= recipe.servings %>">
   <div class="recipe-hero">
@@ -27,8 +27,8 @@
   <header class="recipe-head">
     <% if (recipe.tags && recipe.tags.length) { %>
       <div class="chips">
-        <% recipe.tags.forEach((t) => { %>
-          <a class="chip" href="/?tag=<%= t.slug %>"><%= t.name %></a>
+        <% recipe.tags.forEach((tag) => { %>
+          <a class="chip" href="/?tag=<%= tag.slug %>"><%= tag.name %></a>
         <% }) %>
       </div>
     <% } %>
@@ -38,21 +38,21 @@
 
     <div class="badges">
       <% if (formatTime(recipe.prep_time)) { %>
-        <div class="badge"><span class="badge-ico">⏱</span><span><span class="badge-k">Prep</span><span class="badge-v"><%= formatTime(recipe.prep_time) %></span></span></div>
+        <div class="badge"><span class="badge-ico">⏱</span><span><span class="badge-k"><%= t('prep') %></span><span class="badge-v"><%= formatTime(recipe.prep_time) %></span></span></div>
       <% } %>
       <% if (formatTime(recipe.cook_time)) { %>
-        <div class="badge"><span class="badge-ico">🔥</span><span><span class="badge-k">Cook</span><span class="badge-v"><%= formatTime(recipe.cook_time) %></span></span></div>
+        <div class="badge"><span class="badge-ico">🔥</span><span><span class="badge-k"><%= t('cook') %></span><span class="badge-v"><%= formatTime(recipe.cook_time) %></span></span></div>
       <% } %>
       <% if (formatTime(totalTime)) { %>
-        <div class="badge"><span class="badge-ico">⏲</span><span><span class="badge-k">Total</span><span class="badge-v"><%= formatTime(totalTime) %></span></span></div>
+        <div class="badge"><span class="badge-ico">⏲</span><span><span class="badge-k"><%= t('total') %></span><span class="badge-v"><%= formatTime(totalTime) %></span></span></div>
       <% } %>
-      <div class="badge"><span class="badge-ico">📊</span><span><span class="badge-k">Difficulty</span><span class="badge-v"><%= recipe.difficulty %></span></span></div>
+      <div class="badge"><span class="badge-ico">📊</span><span><span class="badge-k"><%= t('difficulty') %></span><span class="badge-v"><%= t('diff_' + recipe.difficulty) %></span></span></div>
     </div>
 
     <div class="recipe-actions">
-      <a class="btn btn-ghost" href="/recipe/<%= recipe.slug %>/edit">✎ Edit</a>
-      <form method="post" action="/recipe/<%= recipe.slug %>/delete" onsubmit="return confirm('Really delete this recipe?');">
-        <button type="submit" class="btn btn-danger">🗑 Delete</button>
+      <a class="btn btn-ghost" href="/recipe/<%= recipe.slug %>/edit">✎ <%= t('edit') %></a>
+      <form method="post" action="/recipe/<%= recipe.slug %>/delete" onsubmit="return confirm('<%= t('confirm_delete') %>');">
+        <button type="submit" class="btn btn-danger">🗑 <%= t('delete') %></button>
       </form>
     </div>
   </header>
@@ -60,20 +60,20 @@
   <div class="recipe-layout">
     <aside class="ingredients card">
       <div class="ing-head">
-        <h2>Ingredients</h2>
-        <div class="servings-stepper" role="group" aria-label="Adjust servings">
-          <button type="button" class="step-btn" data-step="-1" aria-label="fewer">−</button>
+        <h2><%= t('ingredients') %></h2>
+        <div class="servings-stepper" role="group" aria-label="<%= t('adjust_servings') %>">
+          <button type="button" class="step-btn" data-step="-1" aria-label="<%= t('fewer') %>">−</button>
           <label class="servings-field">
             <input type="number" id="servings-input" min="1" step="1"
-                   value="<%= recipe.servings %>" aria-label="Servings" />
+                   value="<%= recipe.servings %>" aria-label="<%= t('servings_label') %>" />
             <span class="servings-unit" id="servings-unit"><%= recipe.servings_unit %></span>
           </label>
-          <button type="button" class="step-btn" data-step="1" aria-label="more">+</button>
+          <button type="button" class="step-btn" data-step="1" aria-label="<%= t('more') %>">+</button>
         </div>
       </div>
 
       <p class="pantry-hint">
-        Live match against your <a href="/pantry">pantry</a>.
+        <%= t('pantry_hint_1') %> <a href="/pantry"><%= t('pantry_link') %></a>.
       </p>
 
       <ul class="ingredient-list">
@@ -96,9 +96,9 @@
       </ul>
 
       <div class="pantry-legend">
-        <span><i class="dot ok"></i> in stock</span>
-        <span><i class="dot low"></i> too little</span>
-        <span><i class="dot missing"></i> missing</span>
+        <span><i class="dot ok"></i> <%= t('legend_ok') %></span>
+        <span><i class="dot low"></i> <%= t('legend_low') %></span>
+        <span><i class="dot missing"></i> <%= t('legend_missing') %></span>
       </div>
     </aside>
 
@@ -107,13 +107,13 @@
         <div class="notes-box">
           <span class="notes-ico">📌</span>
           <div>
-            <strong>Note</strong>
+            <strong><%= t('note') %></strong>
             <p><%= recipe.notes %></p>
           </div>
         </div>
       <% } %>
 
-      <h2>Instructions</h2>
+      <h2><%= t('instructions') %></h2>
       <% if (recipe.steps.length) { %>
         <ol class="step-list">
           <% recipe.steps.forEach((s) => { %>
@@ -121,7 +121,7 @@
           <% }) %>
         </ol>
       <% } else { %>
-        <p class="muted">No instructions have been added for this recipe yet.</p>
+        <p class="muted"><%= t('no_instructions') %></p>
       <% } %>
     </section>
   </div>

@@ -1,32 +1,32 @@
 <%- include('partials/header') %>
 
 <div class="page-head">
-  <h1>Pantry</h1>
-  <p class="page-sub">Add what you have at home – recipes then show live whether an ingredient is in stock.</p>
+  <h1><%= t('pantry_title') %></h1>
+  <p class="page-sub"><%= t('pantry_sub') %></p>
 </div>
 
 <div class="pantry-layout">
   <section class="form-card pantry-form-card">
-    <h2 class="form-section-title" id="pantry-form-title">Add an item</h2>
+    <h2 class="form-section-title" id="pantry-form-title"><%= t('add_item') %></h2>
     <form class="pantry-form" method="post" action="/pantry" id="pantry-form">
       <div class="field">
-        <label for="p-name">Item</label>
-        <input type="text" id="p-name" name="name" required placeholder="e.g. Flour" />
-        <p class="hint">Same name as in the recipe ingredients = automatic match.</p>
+        <label for="p-name"><%= t('p_item') %></label>
+        <input type="text" id="p-name" name="name" required placeholder="<%= t('p_item_ph') %>" />
+        <p class="hint"><%= t('p_item_hint') %></p>
       </div>
       <div class="grid-2">
         <div class="field">
-          <label for="p-amount">Amount</label>
-          <input type="text" id="p-amount" name="amount" inputmode="decimal" placeholder="e.g. 500" />
+          <label for="p-amount"><%= t('p_amount') %></label>
+          <input type="text" id="p-amount" name="amount" inputmode="decimal" placeholder="<%= t('p_amount_ph') %>" />
         </div>
         <div class="field">
-          <label for="p-unit">Unit</label>
+          <label for="p-unit"><%= t('p_unit') %></label>
           <input type="text" id="p-unit" name="unit" list="unit-list" placeholder="g / ml / pcs" />
         </div>
       </div>
       <div class="form-actions form-actions-inline">
-        <button type="button" class="btn btn-ghost" id="pantry-reset" hidden>New</button>
-        <button type="submit" class="btn btn-primary" id="pantry-submit">Save</button>
+        <button type="button" class="btn btn-ghost" id="pantry-reset" hidden><%= t('p_new') %></button>
+        <button type="submit" class="btn btn-primary" id="pantry-submit"><%= t('save') %></button>
       </div>
     </form>
   </section>
@@ -35,11 +35,11 @@
     <% if (items.length === 0) { %>
       <div class="empty-state small">
         <div class="empty-emoji">🧺</div>
-        <h2>Pantry is empty</h2>
-        <p>Add your first item on the left.</p>
+        <h2><%= t('pantry_empty') %></h2>
+        <p><%= t('pantry_empty_text') %></p>
       </div>
     <% } else { %>
-      <div class="pantry-count"><%= items.length %> <%= items.length === 1 ? 'entry' : 'entries' %></div>
+      <div class="pantry-count"><%= items.length %> <%= items.length === 1 ? t('entry_one') : t('entry_many') %></div>
       <ul class="pantry-list">
         <% items.forEach((item) => { %>
           <li class="pantry-item"
@@ -51,10 +51,10 @@
               <% if (item.amount !== null) { %><%= formatAmount(item.amount) %> <% } %><%= item.unit %>
             </span>
             <span class="pantry-item-actions">
-              <button type="button" class="icon-btn pantry-edit" title="Edit">✎</button>
+              <button type="button" class="icon-btn pantry-edit" title="<%= t('p_edit') %>">✎</button>
               <form method="post" action="/pantry/<%= item.id %>/delete"
-                    onsubmit="return confirm('Remove „<%= item.name %>“ from the pantry?');">
-                <button type="submit" class="icon-btn danger" title="Remove">🗑</button>
+                    onsubmit="return confirm('<%= t('confirm_remove_1') %><%= item.name %><%= t('confirm_remove_2') %>');">
+                <button type="submit" class="icon-btn danger" title="<%= t('p_remove') %>">🗑</button>
               </form>
             </span>
           </li>

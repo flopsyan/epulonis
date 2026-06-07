@@ -9,14 +9,14 @@
         onerror="this.remove()"
       />
     <% } %>
-    <span class="card-badge"><%= recipe.difficulty %></span>
+    <span class="card-badge"><%= t('diff_' + recipe.difficulty) %></span>
   </a>
 
   <div class="card-body">
     <% if (recipe.tags && recipe.tags.length) { %>
       <div class="chips chips-sm">
-        <% recipe.tags.slice(0, 3).forEach((t) => { %>
-          <a class="chip" href="/?tag=<%= t.slug %>"><%= t.name %></a>
+        <% recipe.tags.slice(0, 3).forEach((tag) => { %>
+          <a class="chip" href="/?tag=<%= tag.slug %>"><%= tag.name %></a>
         <% }) %>
       </div>
     <% } %>
@@ -29,8 +29,8 @@
 
     <div class="card-meta">
       <% const total = (recipe.prep_time || 0) + (recipe.cook_time || 0); %>
-      <% if (formatTime(total)) { %><span title="Total time">⏱ <%= formatTime(total) %></span><% } %>
-      <span title="Servings">🍽 <%= formatAmount(recipe.servings) %> <%= recipe.servings_unit %></span>
+      <% if (formatTime(total)) { %><span title="<%= t('total_time') %>">⏱ <%= formatTime(total) %></span><% } %>
+      <span title="<%= t('servings_label') %>">🍽 <%= formatAmount(recipe.servings) %> <%= recipe.servings_unit %></span>
     </div>
   </div>
 </article>

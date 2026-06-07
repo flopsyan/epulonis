@@ -23,6 +23,7 @@ recipes – with a servings calculator and a live match against your own pantry.
   **live** whether an ingredient is *in stock*, *too little* or *missing* – including automatic
   amount/unit conversion (g/kg, ml/l) and singular/plural tolerance (e.g. *lemon* ↔ *lemons*).
 - **Light & dark mode** with a switch in the footer (defaults to **System**).
+- **English & German UI** with a language switch in the footer (defaults to **English**).
 - **Images from the web** via URL, with an elegant placeholder if an image fails to load.
 - **Demo data** (3 recipes + a stocked pantry) is created automatically on first start.
 - Fully **responsive** – works on a laptop and on your phone in the kitchen.

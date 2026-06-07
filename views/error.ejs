@@ -2,9 +2,9 @@
 
 <div class="empty-state">
   <div class="empty-emoji">⚠️</div>
-  <h1>Something went wrong</h1>
-  <pre class="error-detail"><%= message %></pre>
-  <a class="btn btn-primary" href="/">Back to overview</a>
+  <h1><%= t('error_title') %></h1>
+  <% if (message) { %><pre class="error-detail"><%= message %></pre><% } %>
+  <a class="btn btn-primary" href="/"><%= t('back_to_overview') %></a>
 </div>
 
 <%- include('partials/footer') %>

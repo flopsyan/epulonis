@@ -505,17 +505,17 @@ input:focus, textarea:focus, select:focus {
 .footer-links { display: flex; gap: 16px; }
 .footer-links a { color: var(--muted); }
 .footer-right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-.theme-switch {
+.switch {
   display: inline-flex; gap: 2px; padding: 3px;
   background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
 }
-.theme-btn {
+.switch-btn {
   border: none; background: transparent; color: var(--muted);
   font-family: var(--sans); font-size: .82rem; font-weight: 500;
   padding: 5px 12px; border-radius: 999px; cursor: pointer; transition: background .15s, color .15s;
 }
-.theme-btn:hover { color: var(--text); }
-.theme-btn.active { background: var(--primary); color: #fff; }
+.switch-btn:hover { color: var(--text); }
+.switch-btn.active { background: var(--primary); color: #fff; }
 
 .error-detail {
   text-align: left; white-space: pre-wrap; word-break: break-word;

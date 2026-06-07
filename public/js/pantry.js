@@ -1,4 +1,10 @@
 // Convenience: load an existing pantry entry into the form (edit).
+const I18N = (() => {
+  try { return JSON.parse(document.getElementById('i18n')?.textContent || '{}'); }
+  catch { return {}; }
+})();
+const t = (k) => (k in I18N ? I18N[k] : k);
+
 const form = document.getElementById('pantry-form');
 if (form) {
   const nameEl = document.getElementById('p-name');
@@ -12,8 +18,8 @@ if (form) {
     nameEl.value = '';
     amountEl.value = '';
     unitEl.value = '';
-    title.textContent = 'Add an item';
-    submit.textContent = 'Save';
+    title.textContent = t('add_item');
+    submit.textContent = t('save');
     reset.hidden = true;
     nameEl.focus();
   }
@@ -24,8 +30,8 @@ if (form) {
       nameEl.value = item.dataset.name || '';
       amountEl.value = item.dataset.amount || '';
       unitEl.value = item.dataset.unit || '';
-      title.textContent = 'Edit item';
-      submit.textContent = 'Update';
+      title.textContent = t('edit_item');
+      submit.textContent = t('update');
       reset.hidden = false;
       form.scrollIntoView({ behavior: 'smooth', block: 'center' });
       amountEl.focus();

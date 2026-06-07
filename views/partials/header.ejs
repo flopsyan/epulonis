@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= lang %>">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,7 +15,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="/static/css/styles.css" />
+  <link rel="stylesheet" href="/static/css/styles.css?v=<%= assetVersion %>" />
 </head>
 <body>
   <header class="site-header">
@@ -32,17 +32,17 @@
           type="search"
           name="q"
           id="search-input"
-          placeholder="Search recipes …"
+          placeholder="<%= t('search_placeholder') %>"
           value="<%= searchQuery %>"
-          aria-label="Search recipes"
+          aria-label="<%= t('search_aria') %>"
         />
         <div class="search-results" id="search-results" role="listbox" hidden></div>
       </form>
 
       <nav class="nav">
-        <a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>">Recipes</a>
-        <a href="/pantry" class="nav-link <%= currentPath.startsWith('/pantry') ? 'active' : '' %>">Pantry</a>
-        <a href="/new" class="btn btn-primary nav-new">+ New&nbsp;recipe</a>
+        <a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>"><%= t('nav_recipes') %></a>
+        <a href="/pantry" class="nav-link <%= currentPath.startsWith('/pantry') ? 'active' : '' %>"><%= t('nav_pantry') %></a>
+        <a href="/new" class="btn btn-primary nav-new"><%= t('nav_new') %></a>
       </nav>
     </div>
   </header>

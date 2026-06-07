@@ -2,9 +2,9 @@
 
 <div class="empty-state">
   <div class="empty-emoji">🤔</div>
-  <h1>Page not found</h1>
-  <p>This recipe or page doesn’t exist (anymore).</p>
-  <a class="btn btn-primary" href="/">Back to overview</a>
+  <h1><%= t('not_found') %></h1>
+  <p><%= t('not_found_text') %></p>
+  <a class="btn btn-primary" href="/"><%= t('back_to_overview') %></a>
 </div>
 
 <%- include('partials/footer') %>

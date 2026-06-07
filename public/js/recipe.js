@@ -1,6 +1,12 @@
 // Servings scaling + live match against the pantry.
 import { normalizeName, pantryStatus, formatAmount } from './units.js';
 
+const I18N = (() => {
+  try { return JSON.parse(document.getElementById('i18n')?.textContent || '{}'); }
+  catch { return {}; }
+})();
+const t = (k) => (k in I18N ? I18N[k] : k);
+
 const article = document.querySelector('.recipe');
 if (article) {
   const baseServings = Number(article.dataset.baseServings) || 1;
@@ -13,11 +19,11 @@ if (article) {
   } catch { pantry = {}; }
 
   const PILL = {
-    ok: ['ok', '✓', 'in stock'],
-    available: ['ok', '✓', 'in stock'],
-    low: ['low', '≈', 'too little'],
-    unknown: ['unknown', '•', 'in stock'],
-    missing: ['missing', '✕', 'missing'],
+    ok: ['ok', '✓', t('legend_ok')],
+    available: ['ok', '✓', t('legend_ok')],
+    low: ['low', '≈', t('legend_low')],
+    unknown: ['unknown', '•', t('legend_ok')],
+    missing: ['missing', '✕', t('legend_missing')],
   };
 
   function applyPill(el, status, have, scaled, unit) {
@@ -28,16 +34,16 @@ if (article) {
 
     let title = '';
     if (status === 'missing') {
-      title = 'Not in pantry';
+      title = t('not_in_pantry');
     } else if (have) {
       const haveTxt =
-        have.amount != null ? `${formatAmount(have.amount)} ${have.unit || ''}`.trim() : 'in stock';
+        have.amount != null ? `${formatAmount(have.amount)} ${have.unit || ''}`.trim() : t('legend_ok');
       if (status === 'low') {
-        title = `In pantry: ${haveTxt} – need ${formatAmount(scaled)} ${unit}`.trim();
+        title = `${t('in_pantry')} ${haveTxt} – ${t('need')} ${formatAmount(scaled)} ${unit}`.trim();
       } else if (status === 'unknown') {
-        title = `In pantry: ${haveTxt} (different unit, amounts can’t be compared)`;
+        title = `${t('in_pantry')} ${haveTxt} (${t('diff_unit')})`;
       } else {
-        title = `In pantry: ${haveTxt}`;
+        title = `${t('in_pantry')} ${haveTxt}`;
       }
     }
     el.title = title;
