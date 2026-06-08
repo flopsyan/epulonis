@@ -40,7 +40,12 @@
       <div class="empty-state small">
         <div class="empty-emoji">🧺</div>
         <h2><%= t('pantry_empty') %></h2>
-        <p><%= t('pantry_empty_text') %></p>
+        <% if (canEdit) { %>
+          <p><%= t('pantry_empty_text') %></p>
+        <% } else if (locals.loginAvailable) { %>
+          <p><%= t('pantry_empty_guest') %></p>
+          <a class="btn btn-primary" href="/login?next=<%= encodeURIComponent(currentUrl) %>"><%= t('login') %></a>
+        <% } %>
       </div>
     <% } else { %>
       <div class="pantry-count"><%= items.length %> <%= items.length === 1 ? t('entry_one') : t('entry_many') %></div>
