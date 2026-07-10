@@ -15,6 +15,9 @@ import {
   requireAuth,
   requireAdmin,
   loginPossible,
+  loginBlocked,
+  recordLoginFailure,
+  resetLoginFailures,
   authenticate,
   setSessionCookie,
   clearSessionCookie,
@@ -94,10 +97,10 @@ router.get('/', (req, res) => {
 
 // --- Login / logout --------------------------------------------------------
 router.get('/login', (req, res) => {
-  if (!loginPossible() || req.authed) return res.redirect(safeNext(req.query.next));
+  if (!loginPossible() || req.user) return res.redirect(safeNext(req.query.next));
   res.render('login', {
     title: req.t('title_login'),
-    error: false,
+    error: '',
     next: safeNext(req.query.next),
   });
 });
@@ -105,12 +108,19 @@ router.get('/login', (req, res) => {
 router.post('/login', (req, res) => {
   if (!loginPossible()) return res.redirect('/');
   const next = safeNext(req.body.next);
+  if (loginBlocked(req.ip)) {
+    return res
+      .status(429)
+      .render('login', { title: req.t('title_login'), error: 'login_throttled', next });
+  }
   const user = authenticate(req.body.username, req.body.password);
   if (user) {
+    resetLoginFailures(req.ip);
     setSessionCookie(res, req, user);
     return res.redirect(next);
   }
-  res.status(401).render('login', { title: req.t('title_login'), error: true, next });
+  recordLoginFailure(req.ip);
+  res.status(401).render('login', { title: req.t('title_login'), error: 'login_error', next });
 });
 
 router.post('/logout', (req, res) => {

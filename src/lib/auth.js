@@ -4,7 +4,7 @@
 //
 // Login is only possible once at least one account exists. The first admin is
 // bootstrapped from AUTH_USER/AUTH_PASSWORD; further accounts are created in the
-// UI. Sessions are stateless, signed cookies (HMAC-SHA256) – no server-side
+// UI. Sessions are stateless, signed cookies (HMAC-SHA256) - no server-side
 // store. The signature binds the account's password hash, so changing a
 // password invalidates that account's existing sessions.
 
@@ -73,6 +73,44 @@ function readCookie(req, name) {
     }
   }
   return null;
+}
+
+// Failed-login throttling: after MAX_FAILS failed attempts from one client
+// within FAIL_WINDOW_MS, further attempts are rejected until the window ends.
+// In-memory (single process), so online password guessing stays capped without
+// any persistent state. Behind a reverse proxy req.ip follows X-Forwarded-For
+// (trust proxy is on), so clients are told apart correctly.
+const MAX_FAILS = 10;
+const FAIL_WINDOW_MS = 15 * 60 * 1000;
+const loginFails = new Map(); // ip -> { count, start }
+
+export function loginBlocked(ip) {
+  const w = loginFails.get(ip);
+  if (!w) return false;
+  if (Date.now() - w.start > FAIL_WINDOW_MS) {
+    loginFails.delete(ip);
+    return false;
+  }
+  return w.count >= MAX_FAILS;
+}
+
+export function recordLoginFailure(ip) {
+  // Sweep stale entries once the map grows, so rotating IPs cannot leak memory.
+  if (loginFails.size > 1000) {
+    for (const [k, w] of loginFails) {
+      if (Date.now() - w.start > FAIL_WINDOW_MS) loginFails.delete(k);
+    }
+  }
+  const w = loginFails.get(ip);
+  if (!w || Date.now() - w.start > FAIL_WINDOW_MS) {
+    loginFails.set(ip, { count: 1, start: Date.now() });
+  } else {
+    w.count += 1;
+  }
+}
+
+export function resetLoginFailures(ip) {
+  loginFails.delete(ip);
 }
 
 // Editing is only available once an account exists.
