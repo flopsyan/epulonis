@@ -14,7 +14,7 @@ const RECIPES = [
   {
     title: 'Moist Lemon Cake',
     description:
-      'A light, fluffy loaf cake with fresh lemon and a crisp sugar glaze – easy to make and always a hit with coffee.',
+      'A light, fluffy loaf cake with fresh lemon and a crisp sugar glaze - easy to make and always a hit with coffee.',
     image_url: img('1519915028121-7d3463d20b13'),
     servings: 12,
     servings_unit: 'Slices',
@@ -42,12 +42,12 @@ const RECIPES = [
       'Mix the powdered sugar with the remaining lemon juice into a thick glaze and pour it over the cooled cake.',
     ],
     notes:
-      'Take the butter and eggs out of the fridge about an hour before baking – with room-temperature ingredients the batter turns out much fluffier.',
+      'Take the butter and eggs out of the fridge about an hour before baking - with room-temperature ingredients the batter turns out much fluffier.',
   },
   {
     title: 'Spaghetti Carbonara',
     description:
-      'The Roman classic – creamy, savoury and completely without cream. On the table in about 20 minutes.',
+      'The Roman classic - creamy, savoury and completely without cream. On the table in about 20 minutes.',
     image_url: img('1612874742237-6526221588e3'),
     servings: 4,
     servings_unit: 'Servings',
@@ -71,16 +71,16 @@ const RECIPES = [
       'Cut the guanciale into small cubes and render it until crisp in a pan without oil over medium heat.',
       'Whisk the egg yolks and egg with the grated pecorino and parmesan and plenty of fresh pepper until smooth.',
       'Add the drained spaghetti (reserve some pasta water) to the guanciale and toss briefly. Take the pan off the heat.',
-      'Stir in the egg-and-cheese mixture, loosening with a little hot pasta water until creamy – do not cook it further or the egg will scramble.',
+      'Stir in the egg-and-cheese mixture, loosening with a little hot pasta water until creamy - do not cook it further or the egg will scramble.',
       'Serve immediately and sprinkle with extra pecorino and fresh pepper.',
     ],
     notes:
-      'Be sure to take the pan off the heat before adding the egg mixture – the residual heat is enough for the creamy sauce. Too much heat turns it into scrambled eggs.',
+      'Be sure to take the pan off the heat before adding the egg mixture - the residual heat is enough for the creamy sauce. Too much heat turns it into scrambled eggs.',
   },
   {
     title: 'Oven-Baked Chicken Breast with Cherry Tomatoes',
     description:
-      'Juicy chicken breast from the oven on a bed of potatoes and cherry tomatoes – an easy sheet-pan meal for the whole family.',
+      'Juicy chicken breast from the oven on a bed of potatoes and cherry tomatoes - an easy sheet-pan meal for the whole family.',
     image_url: img('1604908176997-125f25cc6f3d'),
     servings: 4,
     servings_unit: 'Servings',
@@ -106,7 +106,7 @@ const RECIPES = [
       'Wash the potatoes, cut them into wedges, toss with 2 tbsp olive oil, salt and pepper, spread on a baking tray and pre-bake for 10 minutes.',
       'Rub the chicken breast with the remaining oil, crushed garlic, paprika, thyme, salt and pepper.',
       'Add the chicken and cherry tomatoes to the potatoes on the tray.',
-      'Bake everything together for about 25–30 minutes until the chicken is cooked through and the potatoes are golden.',
+      'Bake everything together for about 25-30 minutes until the chicken is cooked through and the potatoes are golden.',
       'Let it rest briefly before serving, drizzle with lemon and sprinkle with fresh herbs to taste.',
     ],
     notes:

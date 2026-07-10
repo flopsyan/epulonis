@@ -76,11 +76,11 @@ export function normalizeName(name) {
 
 // Compares a needed ingredient with a pantry entry.
 // Returned status:
-//   'ok'        – enough in stock
-//   'low'       – some in stock, but not enough
-//   'missing'   – not in the pantry
-//   'unknown'   – in the pantry, but quantities not comparable (different unit)
-//   'available' – in the pantry, ingredient without a quantity
+//   'ok'        - enough in stock
+//   'low'       - some in stock, but not enough
+//   'missing'   - not in the pantry
+//   'unknown'   - in the pantry, but quantities not comparable (different unit)
+//   'available' - in the pantry, ingredient without a quantity
 export function pantryStatus(need, have) {
   if (!have) return { status: 'missing', haveBase: 0 };
 

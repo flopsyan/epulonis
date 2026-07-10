@@ -94,7 +94,7 @@ const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => {
   console.log(`${app.locals.siteName} is running at http://localhost:${port}`);
   if (loginPossible()) {
-    console.log('Edit protection is ON – log in at /login to edit. Manage accounts under Settings.');
+    console.log('Edit protection is ON - log in at /login to edit. Manage accounts under Settings.');
   } else {
     console.log('Edit protection: read-only mode (set AUTH_PASSWORD to bootstrap the first account).');
   }

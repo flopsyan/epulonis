@@ -1,7 +1,7 @@
 # Epulonis
 
 **Epulonis** is a **self-hosted recipe platform** for collecting, searching and cooking your own
-recipes – with a servings calculator and a live match against your own pantry. It runs with a single
+recipes - with a servings calculator and a live match against your own pantry. It runs with a single
 `docker compose up` and stores everything permanently in a SQLite database.
 
 ![Overview page](docs/screenshot-overview.png)
@@ -20,19 +20,19 @@ recipes – with a servings calculator and a live match against your own pantry.
 - **Live search suggestions** as you type.
 - **Servings calculator:** change the number of servings and all amounts recalculate automatically.
 - **Pantry:** record what you have at home (in grams, litres, pieces …). Every recipe then shows
-  **live** whether an ingredient is *in stock*, *too little* or *missing* – including automatic
+  **live** whether an ingredient is *in stock*, *too little* or *missing* - including automatic
   amount/unit conversion (g/kg, ml/l) and singular/plural tolerance (e.g. *lemon* ↔ *lemons*).
 - **Subtract from pantry:** after cooking, one click on the recipe opens a dialog pre-filled with the
   (scaled) ingredient amounts. Add or remove entries and tweak the amounts you actually used, then
-  confirm – the matching pantry items are reduced automatically (with unit conversion).
+  confirm - the matching pantry items are reduced automatically (with unit conversion).
 - **Accounts & edit protection (login):** public and read-only by default; editing requires a login.
   Add accounts for friends (all with equal rights), each with a **profile** (display name, avatar,
-  password). Recipes show their **creator**. Ideal behind a reverse proxy – visitors browse, members edit.
+  password). Recipes show their **creator**. Ideal behind a reverse proxy - visitors browse, members edit.
 - **Light & dark mode** with a switch in the footer (defaults to **System**).
 - **English & German UI** with a language switch in the footer (defaults to **English**).
 - **Images from the web** via URL, with an elegant placeholder if an image fails to load.
 - **Demo data** (3 recipes + a stocked pantry) is created automatically on first start.
-- Fully **responsive** – works on a laptop and on your phone in the kitchen.
+- Fully **responsive** - works on a laptop and on your phone in the kitchen.
 
 | Recipe with servings calculator & pantry match | Dark mode |
 | --- | --- |
@@ -109,12 +109,12 @@ The site is **read-only by default**. Set `AUTH_PASSWORD` (and optionally `AUTH_
 the first **admin account** on the first start, then log in via the **Log in** button in the header
 (or at `/login`).
 
-- As long as `AUTH_PASSWORD` is empty **and** no account exists, **nobody** can edit – the site is
+- As long as `AUTH_PASSWORD` is empty **and** no account exists, **nobody** can edit - the site is
   read-only for everyone.
 - Visitors can always browse everything; creating/editing recipes, changing the pantry and
   subtracting from it require a login.
 - **Multiple users:** open the avatar menu (top right) → **Settings** to add or remove accounts.
-  All accounts have the **same rights** (there are no roles) – ideal for sharing with friends.
+  All accounts have the **same rights** (there are no roles) - ideal for sharing with friends.
 - **Profile:** avatar menu → **Profile** to set a display name, upload an avatar (resized in the
   browser, stored in the DB) and change your password.
 - Recipes show their **creator** in the recipe header.

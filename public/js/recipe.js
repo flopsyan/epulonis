@@ -39,7 +39,7 @@ if (article) {
       const haveTxt =
         have.amount != null ? `${formatAmount(have.amount)} ${have.unit || ''}`.trim() : t('legend_ok');
       if (status === 'low') {
-        title = `${t('in_pantry')} ${haveTxt} – ${t('need')} ${formatAmount(scaled)} ${unit}`.trim();
+        title = `${t('in_pantry')} ${haveTxt} - ${t('need')} ${formatAmount(scaled)} ${unit}`.trim();
       } else if (status === 'unknown') {
         title = `${t('in_pantry')} ${haveTxt} (${t('diff_unit')})`;
       } else {
@@ -247,7 +247,7 @@ if (article) {
           closeDialog();
         }
       } catch (e) {
-        /* ignore network errors – pantry stays unchanged */
+        /* ignore network errors - pantry stays unchanged */
       } finally {
         confirmBtn.disabled = false;
       }

@@ -1,5 +1,5 @@
 /* ============================================================
-   Epulonis – Stylesheet
+   Epulonis - Stylesheet
    Warm, cosy cookbook design, system fonts only. Light & dark theme.
    ============================================================ */
 
@@ -41,7 +41,7 @@
 }
 
 /* ============================================================
-   Dark theme – applied via [data-theme="dark"] or, for the "System"
+   Dark theme - applied via [data-theme="dark"] or, for the "System"
    setting, via prefers-color-scheme unless the user forced light.
    ============================================================ */
 :root[data-theme="dark"] {

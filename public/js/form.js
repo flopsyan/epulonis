@@ -45,7 +45,7 @@ function reindexIngredients() {
   });
 }
 
-// Steps use steps[] – only update the numbers.
+// Steps use steps[] - only update the numbers.
 function reindexSteps() {
   if (!stepRows) return;
   [...stepRows.querySelectorAll('.step-row')].forEach((row, i) => {
@@ -84,7 +84,7 @@ setupSection(stepRows, stepRow, 'add-step', reindexSteps, 'textarea');
 
 // Image: either paste a link or upload a picture. Both feed a single hidden
 // field (image-data, submitted as image_url). Uploads are resized in the
-// browser to a data URL – no upload endpoint or dependency needed.
+// browser to a data URL - no upload endpoint or dependency needed.
 const imageUrl = document.getElementById('image-url');
 const imageFile = document.getElementById('image-file');
 const imagePick = document.getElementById('image-pick');
