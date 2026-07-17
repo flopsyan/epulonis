@@ -128,10 +128,6 @@ export function getRecipeBySlug(slug) {
   return hydrate(db.prepare('SELECT * FROM recipes WHERE slug = ?').get(slug));
 }
 
-export function getRecipeById(id) {
-  return hydrate(db.prepare('SELECT * FROM recipes WHERE id = ?').get(id));
-}
-
 export function countRecipes() {
   return db.prepare('SELECT COUNT(*) AS c FROM recipes').get().c;
 }

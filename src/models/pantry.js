@@ -5,10 +5,6 @@ export function allPantry() {
   return db.prepare('SELECT * FROM pantry_items ORDER BY name COLLATE NOCASE ASC').all();
 }
 
-export function getPantry(id) {
-  return db.prepare('SELECT * FROM pantry_items WHERE id = ?').get(id);
-}
-
 // Map of normalized name -> { name, amount, unit } for the live match.
 export function pantryMap() {
   const map = {};
