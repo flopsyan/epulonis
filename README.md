@@ -99,6 +99,11 @@ Everything is configured via environment variables (see `.env.example`):
 | `AUTH_PASSWORD` | *(empty)*   | Password for the first admin account. Empty + no account = whole site read-only |
 | `AUTH_USER`     | `admin`     | Username for the first admin account |
 | `AUTH_SECRET`   | *(random)*  | Optional secret for signing session cookies; a random one is stored in the DB if empty |
+| `OIDC_ISSUER`   | *(empty)*   | Issuer URL of an OpenID Connect provider; enables single sign-on (see below) |
+| `OIDC_CLIENT_ID` | *(empty)*  | Client ID at the provider |
+| `OIDC_CLIENT_SECRET` | *(empty)* | Client secret at the provider |
+| `OIDC_ADMIN_GROUP` | *(empty)* | If set, members of this provider group are admins (checked on every SSO login) |
+| `OIDC_AUTO_CREATE` | `true`  | Create an account on the first SSO login if none matches the username |
 
 > Demo data is only created **once**. If you later empty the database, nothing comes back
 > unexpectedly. For an empty start, set `SEED_DEMO=false`.
@@ -114,7 +119,7 @@ the first **admin account** on the first start, then log in via the **Log in** b
 - Visitors can always browse everything; creating/editing recipes, changing the pantry and
   subtracting from it require a login.
 - **Multiple users:** open the avatar menu (top right) → **Settings** to add or remove accounts.
-  All accounts have the **same rights** (there are no roles) - ideal for sharing with friends.
+  Every account can edit recipes and the pantry; only admins manage accounts.
 - **Profile:** avatar menu → **Profile** to set a display name, upload an avatar (resized in the
   browser, stored in the DB) and change your password.
 - Recipes show their **creator** in the recipe header.
@@ -123,6 +128,35 @@ the first **admin account** on the first start, then log in via the **Log in** b
 
 This pairs well with a reverse proxy: expose the site publicly for reading and keep editing behind
 your own login.
+
+### Single sign-on (OIDC, e.g. Keycloak)
+
+Optional. With `OIDC_ISSUER` set, the login page offers **Log in with SSO** next to the password
+form, which stays as a fallback. Without it, nothing changes.
+
+1. Create a client at the provider (in Keycloak: *Clients → Create client*, OpenID Connect,
+   *Client authentication* on, *Standard flow* only).
+2. Valid redirect URI `https://<your-host>/auth/callback`, valid post logout redirect URI
+   `https://<your-host>/*`, PKCE method `S256`.
+3. Set `OIDC_ISSUER` (Keycloak: `https://<keycloak-host>/realms/<realm>`), `OIDC_CLIENT_ID` and
+   `OIDC_CLIENT_SECRET`.
+4. For admin rights from the provider, add a *Group Membership* mapper with the claim name
+   `groups` to the client (Keycloak: *Client scopes → <client>-dedicated*) and set
+   `OIDC_ADMIN_GROUP`.
+
+How accounts are matched:
+
+- The first SSO login links the local account with the same username, or creates a new one
+  (disable with `OIDC_AUTO_CREATE=false`). From then on the account is bound to the provider's
+  user ID, so renaming at the provider does not matter.
+- Matching by username trusts the provider's usernames: keep self-registration off there.
+- Accounts created by SSO have no password and can only log in through SSO.
+- With `OIDC_ADMIN_GROUP` set, the provider decides who is admin, also for a linked local admin:
+  add yourself to the group before your first SSO login.
+- Logging out also ends the session at the provider.
+- Behind a reverse proxy the callback URL is built from `X-Forwarded-Proto` and `X-Forwarded-Host`
+  (or `Host`), so the proxy has to pass them on. Epulonis must reach the issuer under the same URL
+  as the browser.
 
 ---
 

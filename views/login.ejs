@@ -9,11 +9,17 @@
       <div class="auth-error" role="alert"><%= t(error) %></div>
     <% } %>
 
+    <% if (sso) { %>
+      <a class="btn btn-primary sso-btn" href="/auth/login<%= next !== '/' ? '?next=' + encodeURIComponent(next) : '' %>"><%= t('login_sso') %></a>
+      <% if (passwordLogin) { %><p class="auth-divider"><%= t('login_or_password') %></p><% } %>
+    <% } %>
+
+    <% if (!sso || passwordLogin) { %>
     <form method="post" action="/login" autocomplete="on">
       <input type="hidden" name="next" value="<%= next %>" />
       <div class="field">
         <label for="login-user"><%= t('login_user') %></label>
-        <input type="text" id="login-user" name="username" autocomplete="username" required autofocus />
+        <input type="text" id="login-user" name="username" autocomplete="username" required <%= sso ? '' : 'autofocus' %> />
       </div>
       <div class="field">
         <label for="login-pass"><%= t('login_password') %></label>
@@ -24,6 +30,7 @@
         <button type="submit" class="btn btn-primary"><%= t('login_submit') %></button>
       </div>
     </form>
+    <% } %>
   </section>
 </div>
 

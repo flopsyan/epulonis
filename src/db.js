@@ -134,6 +134,12 @@ if (!hasColumn('users', 'is_admin')) {
   // who can manage user accounts.
   db.exec('UPDATE users SET is_admin = 1 WHERE id = (SELECT MIN(id) FROM users)');
 }
+if (!hasColumn('users', 'oidc_sub')) {
+  // Subject of the linked single sign-on account. SQLite can't add a UNIQUE
+  // column, so uniqueness comes from the index (NULLs don't collide).
+  db.exec('ALTER TABLE users ADD COLUMN oidc_sub TEXT');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS users_oidc_sub ON users(oidc_sub)');
+}
 
 export function getMeta(key) {
   const row = db.prepare('SELECT value FROM meta WHERE key = ?').get(key);

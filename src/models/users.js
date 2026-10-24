@@ -75,6 +75,39 @@ export function createUser({ username, password, display_name, avatar, is_admin 
   return { user: getUserById(info.lastInsertRowid) };
 }
 
+// True if at least one account can log in with a password (SSO-only accounts
+// store an empty hash).
+export function hasPasswordUsers() {
+  return !!db.prepare("SELECT 1 FROM users WHERE pass_hash != '' LIMIT 1").get();
+}
+
+export function getUserBySub(sub) {
+  return db.prepare('SELECT * FROM users WHERE oidc_sub = ?').get(String(sub));
+}
+
+export function linkSub(id, sub) {
+  db.prepare(`UPDATE users SET oidc_sub = ?, updated_at = datetime('now') WHERE id = ?`).run(String(sub), id);
+}
+
+// Account created on the first single sign-on login. It has no password, so
+// verifyPassword() always rejects it and only SSO can log it in.
+export function createSsoUser({ username, display_name, sub } = {}) {
+  const uname = String(username || '').trim();
+  if (!USERNAME_RE.test(uname)) return { error: 'invalid_username' };
+  if (getUserByUsername(uname)) return { error: 'taken' };
+  const info = db
+    .prepare(
+      `INSERT INTO users (username, display_name, pass_hash, pass_salt, oidc_sub)
+       VALUES (?, ?, '', '', ?)`
+    )
+    .run(uname, String(display_name || '').trim() || uname, String(sub));
+  return { user: getUserById(info.lastInsertRowid) };
+}
+
+export function setAdmin(id, isAdminFlag) {
+  db.prepare(`UPDATE users SET is_admin = ?, updated_at = datetime('now') WHERE id = ?`).run(isAdminFlag ? 1 : 0, id);
+}
+
 export function updateProfile(id, { display_name, avatar } = {}) {
   db.prepare(
     `UPDATE users SET display_name = ?, avatar = ?, updated_at = datetime('now') WHERE id = ?`

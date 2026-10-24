@@ -9,6 +9,7 @@ import apiRouter from './routes/api.js';
 import { formatAmount, formatTime } from './lib/format.js';
 import { langFromRequest, makeT, clientStrings } from './lib/i18n.js';
 import { attachAuth, loginPossible, bootstrapAdmin } from './lib/auth.js';
+import { oidcEnabled } from './lib/oidc.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
@@ -98,4 +99,5 @@ app.listen(port, () => {
   } else {
     console.log('Edit protection: read-only mode (set AUTH_PASSWORD to bootstrap the first account).');
   }
+  if (oidcEnabled()) console.log(`Single sign-on is ON (issuer ${process.env.OIDC_ISSUER}).`);
 });

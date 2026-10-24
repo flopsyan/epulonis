@@ -21,7 +21,12 @@ import {
   authenticate,
   setSessionCookie,
   clearSessionCookie,
+  setSsoFlowCookie,
+  takeSsoFlow,
+  setSsoIdCookie,
+  takeSsoIdToken,
 } from '../lib/auth.js';
+import { oidcEnabled, startLogin, finishLogin, logoutUrl, userFromClaims } from '../lib/oidc.js';
 import {
   publicUser,
   getUserById,
@@ -31,6 +36,7 @@ import {
   updateProfile,
   changePassword,
   deleteUser,
+  hasPasswordUsers,
 } from '../models/users.js';
 
 const router = express.Router();
@@ -96,23 +102,25 @@ router.get('/', (req, res) => {
 });
 
 // --- Login / logout --------------------------------------------------------
+function renderLogin(req, res, status, error, next) {
+  res.status(status).render('login', {
+    title: req.t('title_login'),
+    error,
+    next,
+    sso: oidcEnabled(),
+    passwordLogin: hasPasswordUsers(),
+  });
+}
+
 router.get('/login', (req, res) => {
   if (!loginPossible() || req.user) return res.redirect(safeNext(req.query.next));
-  res.render('login', {
-    title: req.t('title_login'),
-    error: '',
-    next: safeNext(req.query.next),
-  });
+  renderLogin(req, res, 200, '', safeNext(req.query.next));
 });
 
 router.post('/login', (req, res) => {
   if (!loginPossible()) return res.redirect('/');
   const next = safeNext(req.body.next);
-  if (loginBlocked(req.ip)) {
-    return res
-      .status(429)
-      .render('login', { title: req.t('title_login'), error: 'login_throttled', next });
-  }
+  if (loginBlocked(req.ip)) return renderLogin(req, res, 429, 'login_throttled', next);
   const user = authenticate(req.body.username, req.body.password);
   if (user) {
     resetLoginFailures(req.ip);
@@ -120,12 +128,61 @@ router.post('/login', (req, res) => {
     return res.redirect(next);
   }
   recordLoginFailure(req.ip);
-  res.status(401).render('login', { title: req.t('title_login'), error: 'login_error', next });
+  renderLogin(req, res, 401, 'login_error', next);
 });
 
-router.post('/logout', (req, res) => {
+// Logging out also ends the provider session; otherwise the next SSO click
+// would log straight back in without asking for a password.
+router.post('/logout', async (req, res) => {
   clearSessionCookie(res, req);
+  const idToken = takeSsoIdToken(req, res);
+  if (idToken && oidcEnabled()) {
+    try {
+      return res.redirect(await logoutUrl(idToken, `${req.protocol}://${req.host}/`));
+    } catch (err) {
+      console.error('SSO logout failed:', err);
+    }
+  }
   res.redirect('/');
+});
+
+// --- Single sign-on (OIDC) -------------------------------------------------
+// Built from the request like the Secure cookie flag, so behind the reverse
+// proxy it relies on X-Forwarded-Proto/-Host (trust proxy is on).
+function ssoCallbackUrl(req) {
+  return `${req.protocol}://${req.host}/auth/callback`;
+}
+
+router.get('/auth/login', async (req, res) => {
+  if (!oidcEnabled()) return res.redirect('/login');
+  const next = safeNext(req.query.next);
+  try {
+    const { url, flow } = await startLogin(ssoCallbackUrl(req));
+    setSsoFlowCookie(res, req, { ...flow, next });
+    res.redirect(url);
+  } catch (err) {
+    console.error('SSO login could not start:', err);
+    renderLogin(req, res, 502, 'sso_failed', next);
+  }
+});
+
+router.get('/auth/callback', async (req, res) => {
+  if (!oidcEnabled()) return res.redirect('/login');
+  const flow = takeSsoFlow(req, res);
+  if (!flow) return renderLogin(req, res, 400, 'sso_failed', '/');
+  const next = safeNext(flow.next);
+  let result;
+  try {
+    const { idToken, claims } = await finishLogin(new URL(req.originalUrl, ssoCallbackUrl(req)), flow);
+    result = userFromClaims(claims);
+    if (result.user) setSsoIdCookie(res, req, idToken);
+  } catch (err) {
+    console.error('SSO callback failed:', err);
+    return renderLogin(req, res, 400, 'sso_failed', next);
+  }
+  if (result.error) return renderLogin(req, res, 403, result.error, next);
+  setSessionCookie(res, req, result.user);
+  res.redirect(next);
 });
 
 // --- Profile (own account) -------------------------------------------------
@@ -133,6 +190,7 @@ router.get('/profile', requireAuth, (req, res) => {
   res.render('profile', {
     title: req.t('profile_title'),
     profileUser: req.user,
+    hasPassword: !!req.user.pass_hash,
     saved: req.query.saved === '1',
     error: req.query.error || '',
   });

@@ -33,6 +33,7 @@
     <input type="text" id="display_name" name="display_name" value="<%= profileUser.display_name %>" placeholder="<%= profileUser.username %>" />
   </div>
 
+  <% if (hasPassword) { %>
   <h2 class="form-section-title"><%= t('change_password') %></h2>
   <div class="field">
     <label for="current_password"><%= t('current_password') %></label>
@@ -49,6 +50,7 @@
     </div>
   </div>
   <p class="hint"><%= t('password_optional') %></p>
+  <% } %>
 
   <div class="form-actions">
     <a class="btn btn-ghost" href="/"><%= t('cancel') %></a>

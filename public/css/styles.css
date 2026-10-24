@@ -557,6 +557,8 @@ dialog.modal::backdrop { background: rgba(20, 14, 8, .5); backdrop-filter: blur(
 .auth-page { display: flex; justify-content: center; padding: 16px 0 40px; }
 .auth-card { width: 100%; max-width: 420px; margin: 0; }
 .auth-card h1 { font-size: 1.8rem; }
+.sso-btn { display: flex; justify-content: center; width: 100%; margin-top: 18px; }
+.auth-divider { text-align: center; color: var(--muted); font-size: .88rem; margin: 16px 0 6px; }
 .auth-error {
   background: var(--missing-bg); color: var(--missing); border: 1px solid #e7c2bd;
   border-radius: var(--radius-sm); padding: 10px 12px; font-size: .9rem; margin: 14px 0 4px;

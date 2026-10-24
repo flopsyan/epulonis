@@ -1,8 +1,9 @@
 // Edit protection with multiple user accounts. The site is public and
 // read-only by default; mutations (recipes, pantry, user management) require a
-// logged-in account. All accounts have the same rights.
+// logged-in account; only admins manage accounts.
 //
-// Login is only possible once at least one account exists. The first admin is
+// Login is only possible once at least one account exists, or single sign-on
+// (oidc.js) is configured and can create one. The first admin is
 // bootstrapped from AUTH_USER/AUTH_PASSWORD; further accounts are created in the
 // UI. Sessions are stateless, signed cookies (HMAC-SHA256) - no server-side
 // store. The signature binds the account's password hash, so changing a
@@ -10,6 +11,7 @@
 
 import crypto from 'node:crypto';
 import { getMeta, setMeta } from '../db.js';
+import { oidcEnabled } from './oidc.js';
 import {
   getUserById,
   getUserByUsername,
@@ -113,9 +115,9 @@ export function resetLoginFailures(ip) {
   loginFails.delete(ip);
 }
 
-// Editing is only available once an account exists.
+// Editing is only available once an account exists, or SSO can create one.
 export function loginPossible() {
-  return countUsers() > 0;
+  return countUsers() > 0 || oidcEnabled();
 }
 
 // Returns the full user row for a request (cached on req), or null.
@@ -147,6 +149,52 @@ export function setSessionCookie(res, req, user) {
 export function clearSessionCookie(res, req) {
   const secure = req.secure ? ' Secure;' : '';
   res.append('Set-Cookie', `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax;${secure}`);
+}
+
+// Single sign-on: the round trip's checks (state, nonce, PKCE verifier, next)
+// ride in a short-lived signed cookie, so SSO stays as stateless as the session.
+// Lax is enough: the provider returns with a top-level GET.
+const SSO_FLOW_COOKIE = 'epulonis-sso-flow';
+const SSO_FLOW_MAX_AGE_S = 10 * 60;
+// The ID token is kept only as the hint for logging out at the provider.
+const SSO_ID_COOKIE = 'epulonis-sso-id';
+
+function setCookie(res, req, name, value, maxAgeS) {
+  const secure = req.secure ? ' Secure;' : '';
+  res.append('Set-Cookie', `${name}=${value}; Path=/; Max-Age=${maxAgeS}; HttpOnly; SameSite=Lax;${secure}`);
+}
+
+export function setSsoFlowCookie(res, req, flow) {
+  const data = Buffer.from(JSON.stringify({ ...flow, at: Date.now() })).toString('base64url');
+  setCookie(res, req, SSO_FLOW_COOKIE, `${data}.${sign(`sso.${data}`)}`, SSO_FLOW_MAX_AGE_S);
+}
+
+// Reads and clears the flow cookie; null if missing, tampered or expired.
+export function takeSsoFlow(req, res) {
+  const raw = readCookie(req, SSO_FLOW_COOKIE);
+  setCookie(res, req, SSO_FLOW_COOKIE, '', 0);
+  if (!raw) return null;
+  const [data, sig] = raw.split('.');
+  const expected = sign(`sso.${data}`);
+  if (!sig || sig.length !== expected.length) return null;
+  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
+  try {
+    const flow = JSON.parse(Buffer.from(data, 'base64url').toString());
+    return Date.now() - flow.at < SSO_FLOW_MAX_AGE_S * 1000 ? flow : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setSsoIdCookie(res, req, idToken) {
+  setCookie(res, req, SSO_ID_COOKIE, idToken, Math.floor(MAX_AGE_MS / 1000));
+}
+
+// Reads and clears the ID token cookie (on logout).
+export function takeSsoIdToken(req, res) {
+  const token = readCookie(req, SSO_ID_COOKIE);
+  if (token) setCookie(res, req, SSO_ID_COOKIE, '', 0);
+  return token;
 }
 
 // Middleware: expose the auth state to every view.

@@ -18,6 +18,12 @@ services:
       AUTH_USER: ${AUTH_USER:-admin}
       AUTH_PASSWORD: ${AUTH_PASSWORD:-}
       AUTH_SECRET: ${AUTH_SECRET:-}
+      # Optional single sign-on (OpenID Connect); empty OIDC_ISSUER = off.
+      OIDC_ISSUER: ${OIDC_ISSUER:-}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
+      OIDC_ADMIN_GROUP: ${OIDC_ADMIN_GROUP:-}
+      OIDC_AUTO_CREATE: ${OIDC_AUTO_CREATE:-true}
     volumes:
       # Persistent data (SQLite database)
       - recipe-data:/app/data
