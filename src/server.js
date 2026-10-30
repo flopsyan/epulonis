@@ -32,10 +32,15 @@ app.locals.assetVersion = process.env.ASSET_VERSION || String(Date.now());
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(express.json({ limit: '2mb' }));
 
-// Static files (CSS, client JS)
+// Static files (CSS, client JS). Scripts revalidate so a deploy cannot leave a stale one behind.
 app.use(
   '/static',
-  express.static(path.join(projectRoot, 'public'), { maxAge: '1h' })
+  express.static(path.join(projectRoot, 'public'), {
+    maxAge: '1h',
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.js')) res.setHeader('Cache-Control', 'no-cache');
+    },
+  })
 );
 
 // Language (from cookie), translations, navigation & search box for all views

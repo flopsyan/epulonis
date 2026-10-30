@@ -63,7 +63,7 @@
             <span class="pantry-item-actions">
               <button type="button" class="icon-btn pantry-edit" title="<%= t('p_edit') %>">✎</button>
               <form method="post" action="/pantry/<%= item.id %>/delete"
-                    onsubmit="return confirm('<%= t('confirm_remove_1') %><%= item.name %><%= t('confirm_remove_2') %>');">
+                    data-confirm="<%= t('confirm_remove_1') %><%= item.name %><%= t('confirm_remove_2') %>" data-confirm-action="<%= t('p_remove') %>">
                 <button type="submit" class="icon-btn danger" title="<%= t('p_remove') %>">🗑</button>
               </form>
             </span>

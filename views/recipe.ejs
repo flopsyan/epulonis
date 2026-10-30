@@ -67,7 +67,7 @@
     <% if (canEdit) { %>
       <div class="recipe-actions">
         <a class="btn btn-ghost" href="/recipe/<%= recipe.slug %>/edit">✎ <%= t('edit') %></a>
-        <form method="post" action="/recipe/<%= recipe.slug %>/delete" onsubmit="return confirm('<%= t('confirm_delete') %>');">
+        <form method="post" action="/recipe/<%= recipe.slug %>/delete" data-confirm="<%= t('confirm_delete') %>" data-confirm-action="<%= t('delete') %>">
           <button type="submit" class="btn btn-danger">🗑 <%= t('delete') %></button>
         </form>
       </div>

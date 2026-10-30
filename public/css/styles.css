@@ -451,6 +451,60 @@ input:focus, textarea:focus, select:focus {
   outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft);
 }
 ::placeholder { color: var(--muted); opacity: .75; }
+
+/* Own controls (public/js/controls.js, dialog.js): selects, suggestion lists,
+   validation messages and the confirm dialog replace the browser's. */
+select { appearance: none; }
+select[data-enhanced], input[data-enhanced] { display: none !important; }
+input[type="number"] { appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.select {
+  display: flex; align-items: center; width: 100%; padding: 10px 12px; cursor: pointer; text-align: left;
+  font-family: var(--sans); font-size: .95rem; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  transition: border-color .15s, box-shadow .15s;
+}
+.select::after {
+  content: ''; flex: none; width: 7px; height: 7px; margin: -3px 2px 0 12px;
+  border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+}
+.select:hover { border-color: var(--muted); }
+.select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.select:disabled { opacity: .6; cursor: default; }
+/* Every label is stacked in one cell, so the button is as wide as its longest option. */
+.select-value { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); }
+.select-value > span { grid-area: 1 / 1; visibility: hidden; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.select-value > .is-on { visibility: visible; }
+input.combo {
+  padding-right: 32px; background-repeat: no-repeat; background-position: right 11px center; background-size: 12px 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238a8a84' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+.popup {
+  inset: auto; margin: 0; padding: 4px 0; overflow: auto; font-size: .95rem;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
+  scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent;
+}
+.popup-list { max-height: 320px; max-width: calc(100vw - 16px); }
+.popup-list [role="option"] { padding: 7px 12px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; outline: none; }
+.popup-list [role="option"]:focus, .popup-list .is-active { background: var(--surface-2); }
+.popup-list [aria-selected="true"] { font-weight: 600; color: var(--primary); }
+.popup-list [aria-disabled="true"] { color: var(--muted); cursor: default; }
+.popup-group { padding: 9px 12px 3px; font-size: .8rem; font-weight: 600; color: var(--muted); }
+
+.field-error { margin: 4px 0 0; font-size: .85rem; color: var(--missing); }
+[aria-invalid="true"] { border-color: var(--missing); }
+.select:has(+ select[aria-invalid="true"]) { border-color: var(--missing); }
+
+.ask {
+  width: min(420px, calc(100vw - 32px)); padding: 22px; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+}
+.ask::backdrop { background: rgba(20, 14, 8, .5); backdrop-filter: blur(2px); }
+.ask h2 { margin: 0; font-size: 1.05rem; font-family: var(--sans); overflow-wrap: anywhere; }
+.ask-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 
@@ -525,6 +579,7 @@ dialog.modal::backdrop { background: rgba(20, 14, 8, .5); backdrop-filter: blur(
 .consume-rows {
   display: flex; flex-direction: column; gap: 14px;
   max-height: 52vh; overflow-y: auto; margin-bottom: 14px;
+  scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent;
 }
 .consume-row {
   display: grid; grid-template-columns: 1fr 84px 84px 38px; gap: 8px; align-items: center;
