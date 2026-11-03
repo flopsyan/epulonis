@@ -123,7 +123,7 @@
                 </span>
                 <% if (canEdit) { %>
                 <span class="pantry-item-actions">
-                  <button type="button" class="icon-btn icon-btn-soft pantry-consume" data-id="<%= item.id %>" title="<%= t('p_consume') %>" aria-label="<%= t('p_consume') %>"><%- include('partials/icon', { name: 'minus' }) %></button>
+                  <button type="button" class="icon-btn pantry-consume" data-id="<%= item.id %>" title="<%= t('p_consume') %>" aria-label="<%= t('p_consume') %>"><%- include('partials/icon', { name: 'minus' }) %></button>
                   <% if (multi) { %>
                     <span class="icon-btn-gap" aria-hidden="true"></span>
                   <% } else { %>

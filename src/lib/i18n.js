@@ -105,7 +105,7 @@ const de = {
   v_max: 'Höchstens {n}.',
   v_invalid: 'Bitte eine gültige Eingabe machen.',
   v_date: 'Bitte ein Datum wie 10.06.2027 eingeben.',
-  date_ph: 'tt.mm.jjjj',
+  date_ph: 'TT.MM.YYYY',
   cal_open: 'Kalender',
   cal_prev: 'Voriger Monat',
   cal_next: 'Nächster Monat',
