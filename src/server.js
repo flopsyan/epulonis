@@ -6,7 +6,7 @@ import './db.js'; // initializes database & schema
 import { seedDemo } from './seed.js';
 import pagesRouter from './routes/pages.js';
 import apiRouter from './routes/api.js';
-import { formatAmount, formatTime } from './lib/format.js';
+import { formatAmount, formatTime, formatDate } from './lib/format.js';
 import { langFromRequest, makeT, clientStrings } from './lib/i18n.js';
 import { attachAuth, loginPossible, bootstrapAdmin } from './lib/auth.js';
 import { oidcEnabled } from './lib/oidc.js';
@@ -25,6 +25,7 @@ app.set('views', path.join(projectRoot, 'views'));
 app.locals.siteName = process.env.SITE_NAME || 'Epulonis';
 app.locals.formatAmount = formatAmount;
 app.locals.formatTime = formatTime;
+app.locals.formatDate = formatDate;
 // Changes on every (re)start -> busts the browser cache for CSS/JS after deploys
 app.locals.assetVersion = process.env.ASSET_VERSION || String(Date.now());
 

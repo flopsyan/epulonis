@@ -9,7 +9,15 @@ import {
   authorsWithCounts,
 } from '../models/recipes.js';
 import { allTagsWithCounts, getTagBySlug } from '../models/tags.js';
-import { allPantry, pantryMap, upsertPantry, deletePantry } from '../models/pantry.js';
+import {
+  allPantry,
+  pantryMap,
+  addPantry,
+  editBatch,
+  deleteBatch,
+  deletePantry,
+  consumePantryItem,
+} from '../models/pantry.js';
 import { normalizeName, pantryStatus } from '../lib/units.js';
 import {
   requireAuth,
@@ -320,19 +328,90 @@ router.get('/recipe/:slug', (req, res) => {
 });
 
 // --- Pantry ----------------------------------------------------------------
-router.get('/pantry', (req, res) => {
+const EXPIRY_WINDOW_DAYS = 7;
+
+function todayIso() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function daysUntil(iso, today) {
+  return Math.round((Date.parse(iso) - Date.parse(today)) / 86400000);
+}
+
+function expiryOf(iso, today) {
+  if (!iso) return null;
+  const days = daysUntil(iso, today);
+  return days < 0 ? 'expired' : days <= EXPIRY_WINDOW_DAYS ? 'soon' : null;
+}
+
+function renderPantry(req, res, extra = {}) {
+  const today = todayIso();
+  const items = allPantry().map((item) => ({
+    ...item,
+    expiry: expiryOf(item.best_before, today),
+    batches: item.batches.map((b) => ({ ...b, expiry: expiryOf(b.best_before, today) })),
+  }));
+
+  // Every dated batch that is expired or due within the window, earliest first.
+  const expiring = items
+    .flatMap((item) =>
+      item.batches
+        .filter((b) => b.expiry && (b.amount == null || b.amount > 0))
+        .map((b) => ({ name: item.name, unit: item.unit, ...b, days: daysUntil(b.best_before, today) }))
+    )
+    .sort((a, b) => a.best_before.localeCompare(b.best_before));
+
   res.render('pantry', {
     title: req.t('pantry_title'),
-    items: allPantry(),
+    items,
+    expiring,
+    pantryJson: JSON.stringify(pantryMap()).replace(/</g, '\\u003c'),
+    ...extra,
   });
-});
+}
+
+router.get('/pantry', (req, res) => renderPantry(req, res));
 
 router.post('/pantry', requireAuth, (req, res) => {
-  upsertPantry({
+  const result = addPantry({
     name: req.body.name,
     amount: req.body.amount,
     unit: req.body.unit,
+    best_before: req.body.best_before,
   });
+  if (result?.error === 'unit') {
+    return renderPantry(req, res.status(400), {
+      pantryError: `${req.t('p_unit_mismatch_1')} ${result.unit || req.t('p_unit_pieces')} ${req.t('p_unit_mismatch_2')}`,
+      form: req.body,
+    });
+  }
+  res.redirect('/pantry');
+});
+
+router.post('/pantry/batch/:id', requireAuth, (req, res) => {
+  editBatch(req.params.id, {
+    amount: req.body.amount,
+    unit: req.body.unit,
+    best_before: req.body.best_before,
+  });
+  res.redirect('/pantry');
+});
+
+router.post('/pantry/batch/:id/delete', requireAuth, (req, res) => {
+  deleteBatch(req.params.id);
+  res.redirect('/pantry');
+});
+
+router.post('/pantry/:id/consume', requireAuth, (req, res) => {
+  const result = consumePantryItem(req.params.id, {
+    amount: req.body.amount,
+    unit: req.body.unit,
+    batchId: req.body.batch_id,
+  });
+  if (result.status === 'incompatible') {
+    return renderPantry(req, res.status(400), { pantryError: req.t('consume_unit_mismatch') });
+  }
   res.redirect('/pantry');
 });
 

@@ -1,11 +1,24 @@
 <%- include('partials/header') %>
 
-<% const canEdit = locals.authed; %>
+<%
+  const canEdit = locals.authed;
+  const form = locals.form || {};
+  const qty = (amount, unit) => `${amount === null || amount === undefined ? '' : formatAmount(amount)} ${unit || ''}`.trim();
+  const relDays = (days) =>
+    days < 0 ? t('exp_expired')
+      : days === 0 ? t('exp_today')
+      : days === 1 ? t('exp_tomorrow')
+      : `${t('exp_in')} ${days} ${t('exp_days')}`;
+%>
 
 <div class="page-head">
   <h1><%= t('pantry_title') %></h1>
   <p class="page-sub"><%= t('pantry_sub') %></p>
 </div>
+
+<% if (locals.pantryError) { %>
+  <p class="pantry-error" role="alert"><%= pantryError %></p>
+<% } %>
 
 <div class="pantry-layout <%= canEdit ? '' : 'readonly' %>">
   <% if (canEdit) { %>
@@ -14,28 +27,53 @@
     <form class="pantry-form" method="post" action="/pantry" id="pantry-form">
       <div class="field">
         <label for="p-name"><%= t('p_item') %></label>
-        <input type="text" id="p-name" name="name" required placeholder="<%= t('p_item_ph') %>" />
+        <input type="text" id="p-name" name="name" required placeholder="<%= t('p_item_ph') %>" value="<%= form.name || '' %>" />
         <p class="hint"><%= t('p_item_hint') %></p>
       </div>
       <div class="grid-2">
         <div class="field">
           <label for="p-amount"><%= t('p_amount') %></label>
-          <input type="text" id="p-amount" name="amount" inputmode="decimal" placeholder="<%= t('p_amount_ph') %>" />
+          <input type="text" id="p-amount" name="amount" inputmode="decimal" placeholder="<%= t('p_amount_ph') %>" value="<%= form.amount || '' %>" />
         </div>
         <div class="field">
           <label for="p-unit"><%= t('p_unit') %></label>
-          <input type="text" id="p-unit" name="unit" list="unit-list" placeholder="g / ml / pcs" />
+          <input type="text" id="p-unit" name="unit" list="unit-list" placeholder="g / ml / pcs" value="<%= form.unit || '' %>" />
         </div>
+      </div>
+      <div class="field">
+        <label for="p-bbd"><%= t('p_bbd') %></label>
+        <input type="date" id="p-bbd" name="best_before" value="<%= form.best_before || '' %>" />
+        <p class="hint hint-info" id="p-dup-hint" hidden><%= t('p_dup_hint') %></p>
       </div>
       <div class="form-actions form-actions-inline">
         <button type="button" class="btn btn-ghost" id="pantry-reset" hidden><%= t('p_new') %></button>
-        <button type="submit" class="btn btn-primary" id="pantry-submit"><%= t('save') %></button>
+        <button type="submit" class="btn btn-primary" id="pantry-submit"><%= t('p_add') %></button>
       </div>
     </form>
   </section>
   <% } %>
 
   <section class="pantry-list-wrap">
+    <% if (expiring.length) { %>
+      <section class="pantry-expiring" aria-labelledby="expiring-title">
+        <h2 id="expiring-title"><%- include('partials/icon', { name: 'clock' }) %><%= t('expiring_title') %> <span class="expiring-count"><%= expiring.length %></span></h2>
+        <ul class="expiring-list">
+          <% expiring.forEach((e) => { %>
+            <li class="expiring-item">
+              <span class="expiring-head">
+                <span class="expiring-name"><%= e.name %></span>
+                <span class="expiring-qty"><%= qty(e.amount, e.unit) %></span>
+              </span>
+              <span class="expiring-foot">
+                <span class="expiring-date"><%= t('p_bbd') %> <%= formatDate(e.best_before, lang) %></span>
+                <span class="expiry-pill <%= e.expiry %>"><%= relDays(e.days) %></span>
+              </span>
+            </li>
+          <% }) %>
+        </ul>
+      </section>
+    <% } %>
+
     <% if (items.length === 0) { %>
       <div class="empty-state small">
         <div class="empty-emoji">🧺</div>
@@ -48,32 +86,99 @@
         <% } %>
       </div>
     <% } else { %>
-      <div class="pantry-count"><%= items.length %> <%= items.length === 1 ? t('entry_one') : t('entry_many') %></div>
-      <ul class="pantry-list">
-        <% items.forEach((item) => { %>
-          <li class="pantry-item"
-              data-name="<%= item.name %>"
-              data-amount="<%= item.amount === null ? '' : item.amount %>"
-              data-unit="<%= item.unit %>">
-            <span class="pantry-item-name"><%= item.name %></span>
-            <span class="pantry-item-qty">
-              <% if (item.amount !== null) { %><%= formatAmount(item.amount) %> <% } %><%= item.unit %>
-            </span>
-            <% if (canEdit) { %>
-            <span class="pantry-item-actions">
-              <button type="button" class="icon-btn pantry-edit" title="<%= t('p_edit') %>">✎</button>
-              <form method="post" action="/pantry/<%= item.id %>/delete"
-                    data-confirm="<%= t('confirm_remove_1') %><%= item.name %><%= t('confirm_remove_2') %>" data-confirm-action="<%= t('p_remove') %>">
-                <button type="submit" class="icon-btn danger" title="<%= t('p_remove') %>">🗑</button>
-              </form>
-            </span>
+      <div class="pantry-tools">
+        <div class="pantry-search">
+          <%- include('partials/icon', { name: 'search' }) %>
+          <input type="search" id="pantry-search" placeholder="<%= t('pantry_search') %>" aria-label="<%= t('pantry_search') %>" autocomplete="off" />
+          <button type="button" class="icon-btn" id="pantry-search-clear" aria-label="<%= t('search_clear') %>" title="<%= t('search_clear') %>" hidden><%- include('partials/icon', { name: 'close' }) %></button>
+        </div>
+        <span class="pantry-count" id="pantry-count"><%= items.length %> <%= items.length === 1 ? t('entry_one') : t('entry_many') %></span>
+      </div>
+      <ul class="pantry-list" id="pantry-list">
+        <% items.forEach((item) => { const multi = item.batches.length > 1; const single = item.batches[0]; %>
+          <li class="pantry-item" data-key="<%= item.name_norm %>" data-name="<%= item.name %>" data-unit="<%= item.unit %>">
+            <div class="pantry-item-row">
+              <span class="pantry-item-name">
+                <span><%= item.name %></span>
+                <% if (multi) { %>
+                  <button type="button" class="batch-toggle" aria-expanded="false" aria-controls="batches-<%= item.id %>" title="<%= t('p_batches_aria') %>">
+                    <%= item.batches.length %> <%= t('p_batches') %><%- include('partials/icon', { name: 'chevron' }) %>
+                  </button>
+                <% } %>
+              </span>
+              <span class="pantry-item-qty"><%= qty(item.amount, item.unit) %></span>
+              <span class="pantry-item-bbd <%= item.expiry || '' %>"><% if (item.best_before) { %><%= t('p_bbd') %> <%= formatDate(item.best_before, lang) %><% } %></span>
+              <% if (canEdit) { %>
+              <span class="pantry-item-actions">
+                <button type="button" class="icon-btn pantry-consume" data-id="<%= item.id %>" title="<%= t('p_consume') %>" aria-label="<%= t('p_consume') %>"><%- include('partials/icon', { name: 'minus' }) %></button>
+                <% if (multi) { %>
+                  <span class="icon-btn-gap" aria-hidden="true"></span>
+                <% } else { %>
+                  <button type="button" class="icon-btn pantry-edit" data-batch="<%= single.id %>" data-amount="<%= single.amount === null ? '' : single.amount %>" data-bbd="<%= single.best_before || '' %>" title="<%= t('p_edit') %>" aria-label="<%= t('p_edit') %>"><%- include('partials/icon', { name: 'edit' }) %></button>
+                <% } %>
+                <form method="post" action="/pantry/<%= item.id %>/delete"
+                      data-confirm="<%= t('confirm_remove_1') %><%= item.name %><%= t('confirm_remove_2') %>" data-confirm-action="<%= t('p_remove') %>">
+                  <button type="submit" class="icon-btn danger" title="<%= t('p_remove') %>" aria-label="<%= t('p_remove') %>"><%- include('partials/icon', { name: 'trash' }) %></button>
+                </form>
+              </span>
+              <% } %>
+            </div>
+            <% if (multi) { %>
+              <ul class="pantry-batches" id="batches-<%= item.id %>" hidden>
+                <% item.batches.forEach((b) => { %>
+                  <li class="pantry-batch">
+                    <span class="pantry-batch-bbd <%= b.expiry || '' %>"><%= b.best_before ? `${t('p_bbd')} ${formatDate(b.best_before, lang)}` : t('p_no_bbd') %></span>
+                    <span class="pantry-batch-qty"><%= qty(b.amount, item.unit) %></span>
+                    <% if (canEdit) { %>
+                    <span class="pantry-item-actions">
+                      <button type="button" class="icon-btn pantry-edit" data-batch="<%= b.id %>" data-amount="<%= b.amount === null ? '' : b.amount %>" data-bbd="<%= b.best_before || '' %>" title="<%= t('p_edit') %>" aria-label="<%= t('p_edit') %>"><%- include('partials/icon', { name: 'edit' }) %></button>
+                      <form method="post" action="/pantry/batch/<%= b.id %>/delete" data-confirm="<%= t('confirm_remove_batch') %>" data-confirm-action="<%= t('p_remove') %>">
+                        <button type="submit" class="icon-btn danger" title="<%= t('p_remove') %>" aria-label="<%= t('p_remove') %>"><%- include('partials/icon', { name: 'trash' }) %></button>
+                      </form>
+                    </span>
+                    <% } %>
+                  </li>
+                <% }) %>
+              </ul>
             <% } %>
           </li>
         <% }) %>
       </ul>
+      <p class="pantry-nomatch" id="pantry-nomatch" hidden><%= t('pantry_nomatch') %></p>
     <% } %>
   </section>
 </div>
+
+<% if (canEdit) { %>
+  <dialog id="consume-dialog" class="modal">
+    <form class="modal-card" method="post" id="consume-form">
+      <div class="modal-head">
+        <h2 id="consume-name"></h2>
+        <button type="button" class="icon-btn" id="consume-x" aria-label="<%= t('cancel') %>"><%- include('partials/icon', { name: 'close' }) %></button>
+      </div>
+      <p class="modal-sub"><%= t('consume_item_sub') %></p>
+      <div class="grid-2">
+        <div class="field">
+          <label for="c-amount"><%= t('p_amount') %></label>
+          <input type="text" id="c-amount" name="amount" inputmode="decimal" required />
+        </div>
+        <div class="field">
+          <label for="c-unit"><%= t('p_unit') %></label>
+          <input type="text" id="c-unit" name="unit" list="unit-list" />
+        </div>
+      </div>
+      <div class="field" id="c-batch-field" hidden>
+        <label for="c-batch"><%= t('p_from_batch') %></label>
+        <select id="c-batch" name="batch_id"></select>
+      </div>
+      <p class="consume-preview" id="c-preview"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="consume-cancel"><%= t('cancel') %></button>
+        <button type="submit" class="btn btn-primary"><%= t('consume_confirm') %></button>
+      </div>
+    </form>
+  </dialog>
+<% } %>
 
 <datalist id="unit-list">
   <option value="g"></option><option value="kg"></option>
@@ -81,5 +186,7 @@
   <option value="pcs"></option><option value="packet"></option>
   <option value="cloves"></option><option value="can"></option>
 </datalist>
+
+<script type="application/json" id="pantry-data"><%- pantryJson %></script>
 
 <%- include('partials/footer', { pageScript: 'pantry.js' }) %>

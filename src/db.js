@@ -86,10 +86,18 @@ db.exec(`
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     name       TEXT NOT NULL,
     name_norm  TEXT NOT NULL UNIQUE,
-    amount     REAL,
     unit       TEXT NOT NULL DEFAULT '',
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS pantry_batches (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id     INTEGER NOT NULL REFERENCES pantry_items(id) ON DELETE CASCADE,
+    amount      REAL,
+    best_before TEXT,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_pantry_batches_item ON pantry_batches(item_id);
 
   CREATE TABLE IF NOT EXISTS meta (
     key   TEXT PRIMARY KEY,
@@ -133,6 +141,14 @@ if (!hasColumn('users', 'is_admin')) {
   // Promote the first (bootstrapped) account so existing installs keep an admin
   // who can manage user accounts.
   db.exec('UPDATE users SET is_admin = 1 WHERE id = (SELECT MIN(id) FROM users)');
+}
+if (hasColumn('pantry_items', 'amount')) {
+  // Amounts moved into pantry_batches (one row per best-before date); every
+  // existing item becomes a single batch without a date.
+  db.transaction(() => {
+    db.exec('INSERT INTO pantry_batches (item_id, amount) SELECT id, amount FROM pantry_items');
+    db.exec('ALTER TABLE pantry_items DROP COLUMN amount');
+  })();
 }
 if (!hasColumn('users', 'oidc_sub')) {
   // Subject of the linked single sign-on account. SQLite can't add a UNIQUE

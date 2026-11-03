@@ -22,9 +22,13 @@ recipes - with a servings calculator and a live match against your own pantry. I
 - **Pantry:** record what you have at home (in grams, litres, pieces …). Every recipe then shows
   **live** whether an ingredient is *in stock*, *too little* or *missing* - including automatic
   amount/unit conversion (g/kg, ml/l) and singular/plural tolerance (e.g. *lemon* ↔ *lemons*).
-- **Subtract from pantry:** after cooking, one click on the recipe opens a dialog pre-filled with the
-  (scaled) ingredient amounts. Add or remove entries and tweak the amounts you actually used, then
-  confirm - the matching pantry items are reduced automatically (with unit conversion).
+- **Best-before dates:** one item can hold several packs with their own amount and date. The list
+  shows the total and the earliest date, a fold-out lists every pack, and a box at the top collects
+  everything that is expired or due within the next 7 days. A filter above the list narrows it down.
+- **Subtract from pantry:** the minus next to an item books what you used and lets you pick the pack.
+  After cooking, one click on the recipe opens a dialog pre-filled with the (scaled) ingredient
+  amounts. Add or remove entries and tweak the amounts you actually used, then confirm - the matching
+  pantry items are reduced automatically (with unit conversion).
 - **Accounts & edit protection (login):** public and read-only by default; editing requires a login.
   Add accounts for friends (all with equal rights), each with a **profile** (display name, avatar,
   password). Recipes show their **creator**. Ideal behind a reverse proxy - visitors browse, members edit.

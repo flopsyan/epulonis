@@ -4,7 +4,7 @@
 
 import { getMeta, setMeta } from './db.js';
 import { createRecipe, countRecipes } from './models/recipes.js';
-import { upsertPantry } from './models/pantry.js';
+import { addPantry } from './models/pantry.js';
 import { listUsers } from './models/users.js';
 
 const img = (id) =>
@@ -145,7 +145,7 @@ export function seedDemo({ force = false } = {}) {
       author_id: admin?.id ?? null,
       author_name: admin ? admin.display_name || admin.username : '',
     });
-  for (const item of PANTRY) upsertPantry(item);
+  for (const item of PANTRY) addPantry(item);
   setMeta('demo_seeded', '1');
   return true;
 }

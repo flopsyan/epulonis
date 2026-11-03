@@ -1,5 +1,5 @@
 // Servings scaling + live match against the pantry.
-import { normalizeName, pantryStatus, formatAmount, consumeAmount } from './units.js';
+import { normalizeName, pantryStatus, formatAmount, consumeAmount, formatDate } from './units.js';
 
 const I18N = (() => {
   try { return JSON.parse(document.getElementById('i18n')?.textContent || '{}'); }
@@ -134,11 +134,31 @@ if (article) {
         <input class="cr-amount" type="text" inputmode="decimal" placeholder="${t('ph_amount')}" />
         <input class="cr-unit" type="text" list="consume-units" placeholder="${t('ph_unit')}" />
         <button type="button" class="row-remove" aria-label="${t('remove_ingredient')}">✕</button>
+        <select class="cr-batch" aria-label="${t('p_from_batch')}" hidden></select>
         <div class="cr-preview"></div>`;
       el.querySelector('.cr-name').value = name;
       el.querySelector('.cr-amount').value = amount;
       el.querySelector('.cr-unit').value = unit;
       return el;
+    }
+
+    // With more than one best-before date the row asks which one to take from
+    // first; the earliest is preselected.
+    function refreshBatches(row) {
+      const select = row.querySelector('select.cr-batch');
+      const have = pantry[normalizeName(row.querySelector('.cr-name').value)];
+      const batches = (have?.batches || []).filter((b) => b.amount == null || b.amount > 0);
+      const key = batches.map((b) => b.id).join(',');
+      if (select.dataset.key === key) return;
+      select.dataset.key = key;
+      select.replaceChildren(
+        ...batches.map((b) => {
+          const date = b.best_before ? `${t('p_bbd')} ${formatDate(b.best_before, document.documentElement.lang)}` : t('p_no_bbd');
+          const amount = `${b.amount == null ? '' : formatAmount(b.amount)} ${have.unit || ''}`.trim();
+          return new Option(amount ? `${date} (${amount})` : date, b.id);
+        })
+      );
+      select.hidden = batches.length < 2;
     }
 
     // Live "Pantry: 1 kg → 400 g" preview for a row.
@@ -184,7 +204,10 @@ if (article) {
       }
       if (!rowsBox.children.length) rowsBox.appendChild(makeRow());
       refreshNameList();
-      rowsBox.querySelectorAll('.consume-row').forEach(preview);
+      rowsBox.querySelectorAll('.consume-row').forEach((row) => {
+        preview(row);
+        refreshBatches(row);
+      });
       if (typeof dialog.showModal === 'function') dialog.showModal();
       else dialog.setAttribute('open', '');
     }
@@ -196,7 +219,9 @@ if (article) {
 
     rowsBox.addEventListener('input', (e) => {
       const row = e.target.closest('.consume-row');
-      if (row) preview(row);
+      if (!row) return;
+      preview(row);
+      if (e.target.matches('.cr-name')) refreshBatches(row);
     });
     rowsBox.addEventListener('click', (e) => {
       if (!e.target.closest('.row-remove')) return;
@@ -222,6 +247,7 @@ if (article) {
           name: row.querySelector('.cr-name').value.trim(),
           amount: row.querySelector('.cr-amount').value,
           unit: row.querySelector('.cr-unit').value.trim(),
+          batchId: row.querySelector('select.cr-batch').hidden ? null : Number(row.querySelector('select.cr-batch').value),
         }))
         .filter((i) => i.name && parseNum(i.amount) > 0);
 

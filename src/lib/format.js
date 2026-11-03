@@ -19,3 +19,14 @@ export function formatTime(minutes) {
   if (h) return `${h} h`;
   return `${rest} min`;
 }
+
+// "2027-06-10" -> "10.06.2027" (de) / "10/06/2027" (en). '' for no date.
+export function formatDate(iso, lang) {
+  if (!iso) return '';
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', {
+    timeZone: 'UTC',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}

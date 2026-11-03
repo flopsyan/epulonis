@@ -73,3 +73,14 @@ export function formatAmount(value) {
   const rounded = Math.round(Number(value) * 100) / 100;
   return rounded.toLocaleString('en-US', { maximumFractionDigits: 2 });
 }
+
+// Mirror of formatDate in src/lib/format.js.
+export function formatDate(iso, lang) {
+  if (!iso) return '';
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', {
+    timeZone: 'UTC',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}

@@ -33,8 +33,9 @@ router.get('/search', (req, res) => {
   res.json({ query: q, results });
 });
 
-// Subtract used amounts from the pantry (requires login).
-// Body: { items: [{ name, amount, unit }] }
+// Subtract used amounts from the pantry (requires login). batchId picks the
+// best-before batch to take from first.
+// Body: { items: [{ name, amount, unit, batchId }] }
 router.post('/pantry/consume', requireAuthApi, (req, res) => {
   const raw = Array.isArray(req.body?.items) ? req.body.items : [];
   const items = raw
@@ -42,6 +43,7 @@ router.post('/pantry/consume', requireAuthApi, (req, res) => {
       name: String(i?.name || '').trim(),
       amount: parseAmount(i?.amount),
       unit: String(i?.unit || '').trim(),
+      batchId: i?.batchId,
     }))
     .filter((i) => i.name && i.amount != null && i.amount > 0);
 
