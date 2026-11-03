@@ -87,8 +87,16 @@ document.querySelectorAll('.batch-toggle').forEach((btn) => {
     const list = document.getElementById(btn.getAttribute('aria-controls'));
     const open = btn.getAttribute('aria-expanded') !== 'true';
     btn.setAttribute('aria-expanded', String(open));
+    btn.textContent = open ? btn.dataset.less : btn.dataset.more;
     list.hidden = !open;
   });
+});
+
+// A tap on a bar segment pins its tooltip (hover alone does not exist on a phone).
+document.addEventListener('click', (e) => {
+  const seg = e.target.closest('.qty-seg');
+  document.querySelectorAll('.qty-seg.is-tip').forEach((s) => { if (s !== seg) s.classList.remove('is-tip'); });
+  if (seg) seg.classList.toggle('is-tip');
 });
 
 // --- Filter ----------------------------------------------------------------

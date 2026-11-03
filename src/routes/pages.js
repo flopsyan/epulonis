@@ -339,6 +339,28 @@ function daysUntil(iso, today) {
   return Math.round((Date.parse(iso) - Date.parse(today)) / 86400000);
 }
 
+function addDays(iso, n) {
+  return new Date(Date.parse(iso) + n * 86400000).toISOString().slice(0, 10);
+}
+
+const weekday = new Intl.DateTimeFormat('de-DE', { weekday: 'long', timeZone: 'UTC' });
+const weekdayShort = new Intl.DateTimeFormat('de-DE', { weekday: 'short', timeZone: 'UTC' });
+const dayMonth = (iso) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}.`;
+
+// One column for everything overdue, then today and each day of the window.
+function expiryCalendar(expiring, today, t) {
+  const cols = [{ kind: 'expired', label: t('cal_expired'), sub: t('cal_before'), items: [] }];
+  for (let d = 0; d <= EXPIRY_WINDOW_DAYS; d++) {
+    const iso = addDays(today, d);
+    const date = new Date(`${iso}T00:00:00Z`);
+    cols.push(d === 0
+      ? { kind: 'today', label: t('cal_today'), sub: `${weekdayShort.format(date).replace('.', '')} ${dayMonth(iso)}`, items: [] }
+      : { kind: 'day', label: weekday.format(date), sub: dayMonth(iso), items: [] });
+  }
+  for (const e of expiring) cols[e.days < 0 ? 0 : e.days + 1].items.push(e);
+  return cols;
+}
+
 function expiryOf(iso, today) {
   if (!iso) return null;
   const days = daysUntil(iso, today);
@@ -366,6 +388,7 @@ function renderPantry(req, res, extra = {}) {
     title: req.t('pantry_title'),
     items,
     expiring,
+    calendar: expiring.length ? expiryCalendar(expiring, today, req.t) : [],
     pantryJson: JSON.stringify(pantryMap()).replace(/</g, '\\u003c'),
     ...extra,
   });

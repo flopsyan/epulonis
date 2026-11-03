@@ -6,19 +6,20 @@
   function pill(status) {
     switch (status) {
       case 'ok':
-      case 'available': return { cls: 'ok', icon: '✓', label: t('legend_ok') };
-      case 'low':       return { cls: 'low', icon: '≈', label: t('legend_low') };
-      case 'unknown':   return { cls: 'unknown', icon: '•', label: t('legend_ok') };
-      default:          return { cls: 'missing', icon: '✕', label: t('legend_missing') };
+      case 'available': return { cls: 'ok', label: t('legend_ok') };
+      case 'low':       return { cls: 'low', label: t('legend_low') };
+      case 'unknown':   return { cls: 'unknown', label: t('legend_ok') };
+      default:          return { cls: 'missing', label: t('legend_missing') };
     }
   }
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0) + (recipe.rest_time || 0);
+  const tint = [...(recipe.title || '')].reduce((n, ch) => n + ch.charCodeAt(0), 0) % 6;
 %>
 
-<p class="breadcrumb"><a href="/"><%= t('back_all') %></a></p>
+<p class="breadcrumb"><a href="/"><%- include('partials/icon', { name: 'back' }) %><%= t('back_all') %></a></p>
 
 <article class="recipe" data-base-servings="<%= recipe.servings %>">
-  <div class="recipe-hero">
+  <div class="recipe-hero tint-<%= tint %>">
     <span class="card-fallback" aria-hidden="true"><%= recipe.title.trim().charAt(0).toUpperCase() %></span>
     <% if (recipe.image_url) { %>
       <img src="<%= recipe.image_url %>" alt="<%= recipe.title %>" onerror="this.remove()" />
@@ -66,9 +67,9 @@
 
     <% if (canEdit) { %>
       <div class="recipe-actions">
-        <a class="btn btn-ghost" href="/recipe/<%= recipe.slug %>/edit">✎ <%= t('edit') %></a>
+        <a class="btn btn-ghost" href="/recipe/<%= recipe.slug %>/edit"><%- include('partials/icon', { name: 'edit' }) %><%= t('edit') %></a>
         <form method="post" action="/recipe/<%= recipe.slug %>/delete" data-confirm="<%= t('confirm_delete') %>" data-confirm-action="<%= t('delete') %>">
-          <button type="submit" class="btn btn-danger">🗑 <%= t('delete') %></button>
+          <button type="submit" class="btn btn-danger"><%- include('partials/icon', { name: 'trash' }) %><%= t('delete') %></button>
         </form>
       </div>
     <% } %>
@@ -107,13 +108,13 @@
             <span class="ing-name">
               <%= ing.name %><% if (ing.note) { %><span class="ing-note"><%= ing.note %></span><% } %>
             </span>
-            <span class="pantry-pill <%= p.cls %>"><span class="pill-ico"><%= p.icon %></span><span class="pill-label"><%= p.label %></span></span>
+            <span class="pantry-pill <%= p.cls %>"><span class="pill-ico" aria-hidden="true"></span><span class="pill-label"><%= p.label %></span></span>
           </li>
         <% }) %>
       </ul>
 
       <% if (canEdit) { %>
-        <button type="button" class="btn btn-ghost btn-sm consume-btn" id="consume-open">🧺 <%= t('consume_open') %></button>
+        <button type="button" class="btn btn-soft consume-btn" id="consume-open"><%- include('partials/icon', { name: 'basket' }) %><%= t('consume_open') %></button>
       <% } %>
 
       <div class="pantry-legend">
@@ -126,7 +127,7 @@
     <section class="method">
       <% if (recipe.notes) { %>
         <div class="notes-box">
-          <span class="notes-ico">📌</span>
+          <span class="notes-ico"><%- include('partials/icon', { name: 'pin' }) %></span>
           <div>
             <strong><%= t('note') %></strong>
             <p><%= recipe.notes %></p>
@@ -153,7 +154,7 @@
     <div class="modal-card">
       <div class="modal-head">
         <h2><%= t('consume_title') %></h2>
-        <button type="button" class="icon-btn" id="consume-x" aria-label="<%= t('cancel') %>">✕</button>
+        <button type="button" class="icon-btn" id="consume-x" aria-label="<%= t('cancel') %>"><%- include('partials/icon', { name: 'close' }) %></button>
       </div>
       <p class="modal-sub"><%= t('consume_sub') %></p>
       <div class="consume-rows" id="consume-rows"></div>

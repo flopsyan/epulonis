@@ -22,7 +22,7 @@ function ingredientRow() {
       <input type="text" class="cell-unit" data-field="unit" placeholder="${t('ph_unit')}" list="unit-list" />
       <input type="text" class="cell-name" data-field="name" placeholder="${t('ph_ingredient')}" />
       <input type="text" class="cell-note" data-field="note" placeholder="${t('ph_note')}" />
-      <button type="button" class="row-remove" aria-label="${t('remove_ingredient')}">✕</button>
+      <button type="button" class="row-remove" aria-label="${t('remove_ingredient')}"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     </div>`);
 }
 
@@ -31,7 +31,7 @@ function stepRow() {
     <div class="row step-row">
       <span class="step-num"></span>
       <textarea data-field="step" name="steps[]" rows="2" placeholder="${t('ph_step')}"></textarea>
-      <button type="button" class="row-remove" aria-label="${t('remove_step')}">✕</button>
+      <button type="button" class="row-remove" aria-label="${t('remove_step')}"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     </div>`);
 }
 

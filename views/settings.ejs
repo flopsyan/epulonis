@@ -37,7 +37,7 @@
         <% if (locals.isAdmin && users.length > 1) { %>
           <form method="post" action="/settings/users/<%= u.id %>/delete"
                 data-confirm="<%= u.id === locals.user.id ? t('confirm_delete_self') : t('confirm_delete_user') %>" data-confirm-action="<%= t('p_remove') %>">
-            <button type="submit" class="icon-btn danger" title="<%= t('p_remove') %>">🗑</button>
+            <button type="submit" class="icon-btn danger" title="<%= t('p_remove') %>" aria-label="<%= t('p_remove') %>"><%- include('partials/icon', { name: 'trash' }) %></button>
           </form>
         <% } %>
       </li>

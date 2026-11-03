@@ -18,7 +18,8 @@ if (input && box) {
 
   function fallbackThumb(title) {
     const span = document.createElement('span');
-    span.className = 'sr-thumb-fallback';
+    const tint = [...(title || '')].reduce((n, ch) => n + ch.charCodeAt(0), 0) % 6;
+    span.className = `sr-thumb-fallback tint-${tint}`;
     span.textContent = (title || '?').trim().charAt(0).toUpperCase();
     return span;
   }

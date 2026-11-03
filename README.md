@@ -23,8 +23,9 @@ recipes - with a servings calculator and a live match against your own pantry. I
   **live** whether an ingredient is *in stock*, *too little* or *missing* - including automatic
   amount/unit conversion (g/kg, ml/l) and singular/plural tolerance (e.g. *lemon* ↔ *lemons*).
 - **Best-before dates:** one item can hold several packs with their own amount and date. The list
-  shows the total and the earliest date, a fold-out lists every pack, and a box at the top collects
-  everything that is expired or due within the next 7 days. A filter above the list narrows it down.
+  shows the total, the earliest date and a split bar with the amount per pack; the link under the
+  date opens every pack. A calendar at the top shows what is expired or due on each of the next
+  7 days. A filter above the list narrows it down.
 - **Subtract from pantry:** the minus next to an item books what you used and lets you pick the pack.
   After cooking, one click on the recipe opens a dialog pre-filled with the (scaled) ingredient
   amounts. Add or remove entries and tweak the amounts you actually used, then confirm - the matching

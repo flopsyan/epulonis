@@ -61,7 +61,7 @@
 
 <% if (recipes.length === 0) { %>
   <div class="empty-state">
-    <div class="empty-emoji">🍳</div>
+    <div class="empty-icon"><%- include('partials/icon', { name: isSearch ? 'search' : 'book' }) %></div>
     <% if (isSearch) { %>
       <h2><%= t('empty_no_matches') %></h2>
       <p><%= t('nothing_found_1') %> „<%= query %>“ <%= t('nothing_found_2') %></p>

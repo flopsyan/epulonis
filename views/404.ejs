@@ -1,7 +1,7 @@
 <%- include('partials/header') %>
 
 <div class="empty-state">
-  <div class="empty-emoji">🤔</div>
+  <div class="empty-icon"><%- include('partials/icon', { name: 'help' }) %></div>
   <h1><%= t('not_found') %></h1>
   <p><%= t('not_found_text') %></p>
   <a class="btn btn-primary" href="/"><%= t('back_to_overview') %></a>

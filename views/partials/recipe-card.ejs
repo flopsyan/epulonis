@@ -1,5 +1,6 @@
+<% const tint = [...(recipe.title || '')].reduce((n, ch) => n + ch.charCodeAt(0), 0) % 6; %>
 <article class="card recipe-card">
-  <a class="card-media" href="/recipe/<%= recipe.slug %>">
+  <a class="card-media tint-<%= tint %>" href="/recipe/<%= recipe.slug %>">
     <span class="card-fallback" aria-hidden="true"><%= (recipe.title || '?').trim().charAt(0).toUpperCase() %></span>
     <% if (recipe.image_url) { %>
       <img

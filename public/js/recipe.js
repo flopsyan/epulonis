@@ -19,17 +19,16 @@ if (article) {
   } catch { pantry = {}; }
 
   const PILL = {
-    ok: ['ok', '✓', t('legend_ok')],
-    available: ['ok', '✓', t('legend_ok')],
-    low: ['low', '≈', t('legend_low')],
-    unknown: ['unknown', '•', t('legend_ok')],
-    missing: ['missing', '✕', t('legend_missing')],
+    ok: ['ok', t('legend_ok')],
+    available: ['ok', t('legend_ok')],
+    low: ['low', t('legend_low')],
+    unknown: ['unknown', t('legend_ok')],
+    missing: ['missing', t('legend_missing')],
   };
 
   function applyPill(el, status, have, scaled, unit) {
-    const [cls, ico, label] = PILL[status] || PILL.missing;
+    const [cls, label] = PILL[status] || PILL.missing;
     el.className = 'pantry-pill ' + cls;
-    el.querySelector('.pill-ico').textContent = ico;
     el.querySelector('.pill-label').textContent = label;
 
     let title = '';
@@ -133,7 +132,7 @@ if (article) {
         <input class="cr-name" type="text" list="consume-names" placeholder="${t('ph_ingredient')}" />
         <input class="cr-amount" type="text" inputmode="decimal" placeholder="${t('ph_amount')}" />
         <input class="cr-unit" type="text" list="consume-units" placeholder="${t('ph_unit')}" />
-        <button type="button" class="row-remove" aria-label="${t('remove_ingredient')}">✕</button>
+        <button type="button" class="row-remove" aria-label="${t('remove_ingredient')}"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
         <select class="cr-batch" aria-label="${t('p_from_batch')}" hidden></select>
         <div class="cr-preview"></div>`;
       el.querySelector('.cr-name').value = name;

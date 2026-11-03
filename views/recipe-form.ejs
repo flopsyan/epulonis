@@ -1,6 +1,6 @@
 <%- include('partials/header') %>
 
-<p class="breadcrumb"><a href="/"><%= t('back_all') %></a></p>
+<p class="breadcrumb"><a href="/"><%- include('partials/icon', { name: 'back' }) %><%= t('back_all') %></a></p>
 
 <div class="page-head">
   <h1><%= mode === 'edit' ? t('edit_recipe') : t('new_recipe') %></h1>
@@ -104,7 +104,7 @@
           <input type="text" class="cell-unit" data-field="unit" placeholder="<%= t('ph_unit') %>" list="unit-list" value="<%= ing.unit %>" />
           <input type="text" class="cell-name" data-field="name" placeholder="<%= t('ph_ingredient') %>" value="<%= ing.name %>" />
           <input type="text" class="cell-note" data-field="note" placeholder="<%= t('ph_note') %>" value="<%= ing.note %>" />
-          <button type="button" class="row-remove" aria-label="<%= t('remove_ingredient') %>">✕</button>
+          <button type="button" class="row-remove" aria-label="<%= t('remove_ingredient') %>"><%- include('partials/icon', { name: 'close' }) %></button>
         </div>
       <% }) %>
     </div>
@@ -121,7 +121,7 @@
         <div class="row step-row">
           <span class="step-num"></span>
           <textarea data-field="step" name="steps[]" rows="2" placeholder="<%= t('ph_step') %>"><%= s.text || s %></textarea>
-          <button type="button" class="row-remove" aria-label="<%= t('remove_step') %>">✕</button>
+          <button type="button" class="row-remove" aria-label="<%= t('remove_step') %>"><%- include('partials/icon', { name: 'close' }) %></button>
         </div>
       <% }) %>
     </div>
