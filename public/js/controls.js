@@ -303,6 +303,197 @@ function enhanceSuggestions(input) {
   });
 }
 
+// ---------------------------------------------------------------- date
+// Ported from Tesseron. The hidden native date input keeps the ISO value; the visible text
+// field shows the app's format, dd.mm.yyyy (de) or dd/mm/yyyy (en), like formatDate.
+
+const pad = (n) => String(n).padStart(2, '0');
+const isoOf = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+const isDe = () => document.documentElement.lang === 'de';
+const showDate = (iso) => (/^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso.split('-').reverse().join(isDe() ? '.' : '/') : '');
+
+// dd.mm.yyyy or dd/mm/yyyy, also 1.7.2026, 010726, 2026-07-01; a two-digit year only once the field is left.
+function parseDate(text, final) {
+  const s = text.trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  let y, mo, d;
+  if (m) [, y, mo, d] = m;
+  else if ((m = s.match(/^(\d{1,2})[.,\/-](\d{1,2})[.,\/-](\d{4}|\d{2})$/))) [, d, mo, y] = m;
+  else if ((m = s.match(/^(\d{2})(\d{2})(\d{4}|\d{2})$/))) [, d, mo, y] = m;
+  else return null;
+  if (y.length === 2) {
+    if (!final) return null;
+    y = `20${y}`;
+  }
+  const date = new Date(Date.UTC(+y, +mo - 1, +d));
+  if (date.getUTCFullYear() !== +y || date.getUTCMonth() !== +mo - 1 || date.getUTCDate() !== +d) return null;
+  return isoOf(+y, +mo - 1, +d);
+}
+
+function todayIso() {
+  const t = new Date();
+  return isoOf(t.getFullYear(), t.getMonth(), t.getDate());
+}
+
+const CAL_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+const arrow = (d) => `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+
+function enhanceDate(input) {
+  if ('enhanced' in input.dataset) return;
+  input.dataset.enhanced = '';
+  const wrap = make('span', 'datefield');
+  const text = make('input', input.className);
+  text.type = 'text';
+  text.inputMode = 'decimal';
+  text.autocomplete = 'off';
+  text.placeholder = tr('date_ph');
+  if (labelText(input)) text.setAttribute('aria-label', labelText(input));
+  // The hidden native field cannot show a validation message, so the visible one carries `required`.
+  text.required = input.required;
+  input.required = false;
+  const btn = make('button', 'icon-btn');
+  btn.type = 'button';
+  btn.setAttribute('aria-label', tr('cal_open'));
+  btn.innerHTML = CAL_ICON;
+  wrap.append(text, btn);
+  input.before(wrap);
+  mirrorState(input, wrap);
+
+  const show = () => {
+    text.value = showDate(input.value);
+    text.setCustomValidity('');
+  };
+  onValueSet(input, [['value', nativeValue.input]], show);
+  onReset(input, show);
+  show();
+  const set = (iso) => {
+    if (iso === input.value) return false;
+    nativeValue.input.set.call(input, iso);
+    return true;
+  };
+  text.addEventListener('input', () => {
+    const iso = parseDate(text.value, false);
+    text.setCustomValidity('');
+    if (set(iso || '')) fire(input, 'input');
+  });
+  text.addEventListener('change', () => {
+    const iso = parseDate(text.value, true);
+    text.setCustomValidity(text.value.trim() && !iso ? tr('v_date') : '');
+    set(iso || '');
+    if (iso) text.value = showDate(iso);
+    fire(input, 'input', 'change');
+  });
+
+  attachCalendar(wrap, btn, text, {
+    get: () => input.value,
+    set: (iso) => {
+      if (set(iso)) fire(input, 'input', 'change');
+      show();
+    },
+  });
+}
+
+function attachCalendar(owner, btn, text, value) {
+  const cal = popup(owner, 'popup-cal', 'dialog');
+  cal.setAttribute('aria-label', tr('cal_open'));
+  const monthTitle = new Intl.DateTimeFormat(isDe() ? 'de-DE' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const weekdays = isDe() ? ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] : ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  let year;
+  let month;
+
+  function render(focusIso) {
+    const today = todayIso();
+    const first = new Date(Date.UTC(year, month, 1));
+    const days = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    const lead = (first.getUTCDay() + 6) % 7;
+    const head = make('div', 'cal-head');
+    const prev = make('button', 'icon-btn');
+    prev.type = 'button';
+    prev.dataset.step = '-1';
+    prev.setAttribute('aria-label', tr('cal_prev'));
+    prev.innerHTML = arrow('M15 6l-6 6 6 6');
+    const next = make('button', 'icon-btn');
+    next.type = 'button';
+    next.dataset.step = '1';
+    next.setAttribute('aria-label', tr('cal_next'));
+    next.innerHTML = arrow('M9 6l6 6-6 6');
+    head.append(prev, make('span', 'cal-title', monthTitle.format(first)), next);
+    const grid = make('div', 'cal-grid');
+    for (const d of weekdays) grid.append(make('span', 'cal-dow', d));
+    for (let i = 0; i < lead; i++) grid.append(make('span'));
+    for (let d = 1; d <= days; d++) {
+      const iso = isoOf(year, month, d);
+      const b = make('button', '', String(d));
+      b.type = 'button';
+      b.dataset.date = iso;
+      b.tabIndex = -1;
+      b.classList.toggle('is-today', iso === today);
+      b.classList.toggle('is-selected', iso === value.get());
+      b.setAttribute('aria-label', showDate(iso));
+      grid.append(b);
+    }
+    cal.replaceChildren(head, grid);
+    const target = cal.querySelector(`[data-date="${focusIso}"]`) || cal.querySelector('[data-date]');
+    target.tabIndex = 0;
+    return target;
+  }
+
+  function open() {
+    const base = value.get() || todayIso();
+    [year, month] = [+base.slice(0, 4), +base.slice(5, 7) - 1];
+    const target = render(base);
+    cal.showPopover();
+    place(cal, false);
+    target.focus({ preventScroll: true });
+  }
+
+  function moveTo(iso) {
+    [year, month] = [+iso.slice(0, 4), +iso.slice(5, 7) - 1];
+    render(iso).focus({ preventScroll: true });
+  }
+
+  const shift = (iso, days, months = 0) => {
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = months ? new Date(Date.UTC(y, m - 1 + months, Math.min(d, new Date(Date.UTC(y, m + months, 0)).getUTCDate()))) : new Date(Date.UTC(y, m - 1, d + days));
+    return dt.toISOString().slice(0, 10);
+  };
+
+  toggleFrom(btn, () => cal.matches(':popover-open'), open);
+  text.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' && e.altKey) {
+      e.preventDefault();
+      open();
+    }
+  });
+  cal.addEventListener('beforetoggle', (e) => {
+    if (e.newState === 'closed' && cal.contains(document.activeElement)) text.focus({ preventScroll: true });
+  });
+  cal.addEventListener('click', (e) => {
+    const step = e.target.closest('[data-step]');
+    if (step) {
+      const d = new Date(Date.UTC(year, month + Number(step.dataset.step), 1));
+      [year, month] = [d.getUTCFullYear(), d.getUTCMonth()];
+      render('');
+      cal.querySelector(`[data-step="${step.dataset.step}"]`).focus();
+      return;
+    }
+    const day = e.target.closest('[data-date]');
+    if (!day) return;
+    text.focus({ preventScroll: true });
+    cal.hidePopover();
+    value.set(day.dataset.date);
+  });
+  cal.addEventListener('keydown', (e) => {
+    const day = e.target.closest('[data-date]');
+    if (!day) return;
+    const iso = day.dataset.date;
+    const to = { ArrowLeft: [-1], ArrowRight: [1], ArrowUp: [-7], ArrowDown: [7], PageUp: [0, -1], PageDown: [0, 1] }[e.key];
+    if (!to) return;
+    e.preventDefault();
+    moveTo(shift(iso, ...to));
+  });
+}
+
 // ---------------------------------------------------------------- validation
 
 const errors = new WeakMap();
@@ -327,7 +518,7 @@ function message(el) {
 // The control the user sees, for hidden value carriers and wrapped fields.
 function visibleOf(el) {
   if (el.tagName === 'SELECT' && 'enhanced' in el.dataset) return el.previousElementSibling;
-  return el;
+  return el.closest('.datefield') || el;
 }
 
 function clearError(el) {
@@ -368,6 +559,7 @@ function enhance(root) {
   const pick = (sel) => [...(root.matches?.(sel) ? [root] : []), ...(root.querySelectorAll?.(sel) || [])];
   pick('select').forEach(enhanceSelect);
   pick('input[list]').forEach(enhanceSuggestions);
+  pick('input[type="date"]').forEach(enhanceDate);
 }
 
 enhance(document.body);

@@ -495,6 +495,22 @@ input.combo {
 .popup-list [aria-selected="true"] { font-weight: 600; color: var(--primary); }
 .popup-list [aria-disabled="true"] { color: var(--muted); cursor: default; }
 .popup-group { padding: 9px 12px 3px; font-size: .8rem; font-weight: 600; color: var(--muted); }
+.popup-cal { padding: 10px; width: 272px; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.cal-title { font-weight: 600; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-dow { font-size: .8rem; color: var(--muted); text-align: center; padding: 4px 0; }
+.cal-grid button {
+  height: 32px; padding: 0; font-family: var(--sans); font-size: .9rem; color: var(--text); cursor: pointer;
+  background: none; border: 1px solid transparent; border-radius: 6px;
+}
+.cal-grid button:hover { background: var(--surface-2); }
+.cal-grid button:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.cal-grid .is-today { border-color: var(--border-strong); }
+.cal-grid .is-selected, .cal-grid .is-selected:hover { background: var(--primary); color: #fff; }
+.datefield { position: relative; display: flex; align-items: center; }
+.datefield input { padding-right: 40px; }
+.datefield .icon-btn { position: absolute; right: 4px; width: 30px; height: 30px; }
 
 .field-error { margin: 4px 0 0; font-size: .85rem; color: var(--missing); }
 [aria-invalid="true"] { border-color: var(--missing); }
