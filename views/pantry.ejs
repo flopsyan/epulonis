@@ -37,7 +37,7 @@
         </div>
         <div class="field">
           <label for="p-unit"><%= t('p_unit') %></label>
-          <input type="text" id="p-unit" name="unit" list="unit-list" placeholder="g / ml / pcs" value="<%= form.unit || '' %>" />
+          <input type="text" id="p-unit" name="unit" list="unit-list" placeholder="g / ml / Stk." value="<%= form.unit || '' %>" />
         </div>
       </div>
       <div class="field">
@@ -65,7 +65,7 @@
                 <span class="expiring-qty"><%= qty(e.amount, e.unit) %></span>
               </span>
               <span class="expiring-foot">
-                <span class="expiring-date"><%= t('p_bbd') %> <%= formatDate(e.best_before, lang) %></span>
+                <span class="expiring-date"><%= t('p_bbd') %> <%= formatDate(e.best_before) %></span>
                 <span class="expiry-pill <%= e.expiry %>"><%= relDays(e.days) %></span>
               </span>
             </li>
@@ -107,7 +107,7 @@
                 <% } %>
               </span>
               <span class="pantry-item-qty"><%= qty(item.amount, item.unit) %></span>
-              <span class="pantry-item-bbd <%= item.expiry || '' %>"><% if (item.best_before) { %><%= t('p_bbd') %> <%= formatDate(item.best_before, lang) %><% } %></span>
+              <span class="pantry-item-bbd <%= item.expiry || '' %>"><% if (item.best_before) { %><%= t('p_bbd') %> <%= formatDate(item.best_before) %><% } %></span>
               <% if (canEdit) { %>
               <span class="pantry-item-actions">
                 <button type="button" class="icon-btn pantry-consume" data-id="<%= item.id %>" title="<%= t('p_consume') %>" aria-label="<%= t('p_consume') %>"><%- include('partials/icon', { name: 'minus' }) %></button>
@@ -127,7 +127,7 @@
               <ul class="pantry-batches" id="batches-<%= item.id %>" hidden>
                 <% item.batches.forEach((b) => { %>
                   <li class="pantry-batch">
-                    <span class="pantry-batch-bbd <%= b.expiry || '' %>"><%= b.best_before ? `${t('p_bbd')} ${formatDate(b.best_before, lang)}` : t('p_no_bbd') %></span>
+                    <span class="pantry-batch-bbd <%= b.expiry || '' %>"><%= b.best_before ? `${t('p_bbd')} ${formatDate(b.best_before)}` : t('p_no_bbd') %></span>
                     <span class="pantry-batch-qty"><%= qty(b.amount, item.unit) %></span>
                     <% if (canEdit) { %>
                     <span class="pantry-item-actions">
@@ -183,8 +183,9 @@
 <datalist id="unit-list">
   <option value="g"></option><option value="kg"></option>
   <option value="ml"></option><option value="l"></option>
-  <option value="pcs"></option><option value="packet"></option>
-  <option value="cloves"></option><option value="can"></option>
+  <option value="Stk."></option><option value="Pck."></option>
+  <option value="Zehen"></option><option value="Dose"></option>
+  <option value="Becher"></option><option value="Glas"></option>
 </datalist>
 
 <script type="application/json" id="pantry-data"><%- pantryJson %></script>

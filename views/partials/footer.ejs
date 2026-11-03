@@ -13,11 +13,6 @@
           <% } %>
         </span>
 
-        <div class="switch lang-switch" role="group" aria-label="<%= t('lang_aria') %>">
-          <button type="button" class="switch-btn <%= lang === 'en' ? 'active' : '' %>" data-lang-choice="en">EN</button>
-          <button type="button" class="switch-btn <%= lang === 'de' ? 'active' : '' %>" data-lang-choice="de">DE</button>
-        </div>
-
         <div class="switch theme-switch" role="group" aria-label="<%= t('theme_aria') %>">
           <button type="button" class="switch-btn" data-theme-choice="system"><%= t('theme_system') %></button>
           <button type="button" class="switch-btn" data-theme-choice="light"><%= t('theme_light') %></button>
@@ -28,7 +23,6 @@
   </footer>
 
   <script type="application/json" id="i18n"><%- i18nJson %></script>
-  <script type="module" src="/static/js/lang.js?v=<%= assetVersion %>"></script>
   <script type="module" src="/static/js/controls.js?v=<%= assetVersion %>"></script>
   <script type="module" src="/static/js/dialog.js?v=<%= assetVersion %>"></script>
   <script type="module" src="/static/js/theme.js?v=<%= assetVersion %>"></script>

@@ -5,10 +5,10 @@
 // Synonyms -> canonical unit
 const SYNONYMS = {
   // mass
-  mg: 'mg', milligram: 'mg', milligrams: 'mg',
-  g: 'g', gr: 'g', gram: 'g', grams: 'g', gramme: 'g', grammes: 'g',
+  mg: 'mg', milligram: 'mg', milligrams: 'mg', milligramm: 'mg',
+  g: 'g', gr: 'g', gram: 'g', grams: 'g', gramme: 'g', grammes: 'g', gramm: 'g',
   dag: 'dag',
-  kg: 'kg', kilo: 'kg', kilogram: 'kg', kilograms: 'kg',
+  kg: 'kg', kilo: 'kg', kilogram: 'kg', kilograms: 'kg', kilogramm: 'kg',
   // volume
   ml: 'ml', milliliter: 'ml', millilitre: 'ml', milliliters: 'ml', millilitres: 'ml',
   cl: 'cl',
@@ -16,6 +16,18 @@ const SYNONYMS = {
   l: 'l', liter: 'l', litre: 'l', liters: 'l', litres: 'l', ltr: 'l',
   // count
   '': 'pcs', pc: 'pcs', pcs: 'pcs', piece: 'pcs', pieces: 'pcs', x: 'pcs',
+  stk: 'pcs', 'stück': 'pcs', stck: 'pcs', st: 'pcs',
+  // kitchen units without a conversion; English spellings kept so old entries still match
+  el: 'el', essl: 'el', 'esslöffel': 'el', tbsp: 'el',
+  tl: 'tl', teel: 'tl', 'teelöffel': 'tl', tsp: 'tl',
+  prise: 'prise', prisen: 'prise', pinch: 'prise', pinches: 'prise',
+  pck: 'pck', 'päckchen': 'pck', packung: 'pck', pkg: 'pck', packet: 'pck', packets: 'pck',
+  zehe: 'zehe', zehen: 'zehe', clove: 'zehe', cloves: 'zehe',
+  dose: 'dose', dosen: 'dose', can: 'dose', cans: 'dose',
+  tasse: 'tasse', tassen: 'tasse', cup: 'tasse', cups: 'tasse',
+  scheibe: 'scheibe', scheiben: 'scheibe', slice: 'scheibe', slices: 'scheibe',
+  bund: 'bund', bunch: 'bund',
+  glas: 'glas', 'gläser': 'glas',
 };
 
 // Conversion factors to the respective base unit

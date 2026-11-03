@@ -2,15 +2,26 @@
 // Used for the live pantry match on the recipe page.
 
 const SYNONYMS = {
-  mg: 'mg', milligram: 'mg', milligrams: 'mg',
-  g: 'g', gr: 'g', gram: 'g', grams: 'g', gramme: 'g', grammes: 'g',
+  mg: 'mg', milligram: 'mg', milligrams: 'mg', milligramm: 'mg',
+  g: 'g', gr: 'g', gram: 'g', grams: 'g', gramme: 'g', grammes: 'g', gramm: 'g',
   dag: 'dag',
-  kg: 'kg', kilo: 'kg', kilogram: 'kg', kilograms: 'kg',
+  kg: 'kg', kilo: 'kg', kilogram: 'kg', kilograms: 'kg', kilogramm: 'kg',
   ml: 'ml', milliliter: 'ml', millilitre: 'ml', milliliters: 'ml', millilitres: 'ml',
   cl: 'cl',
   dl: 'dl',
   l: 'l', liter: 'l', litre: 'l', liters: 'l', litres: 'l', ltr: 'l',
   '': 'pcs', pc: 'pcs', pcs: 'pcs', piece: 'pcs', pieces: 'pcs', x: 'pcs',
+  stk: 'pcs', 'stück': 'pcs', stck: 'pcs', st: 'pcs',
+  el: 'el', essl: 'el', 'esslöffel': 'el', tbsp: 'el',
+  tl: 'tl', teel: 'tl', 'teelöffel': 'tl', tsp: 'tl',
+  prise: 'prise', prisen: 'prise', pinch: 'prise', pinches: 'prise',
+  pck: 'pck', 'päckchen': 'pck', packung: 'pck', pkg: 'pck', packet: 'pck', packets: 'pck',
+  zehe: 'zehe', zehen: 'zehe', clove: 'zehe', cloves: 'zehe',
+  dose: 'dose', dosen: 'dose', can: 'dose', cans: 'dose',
+  tasse: 'tasse', tassen: 'tasse', cup: 'tasse', cups: 'tasse',
+  scheibe: 'scheibe', scheiben: 'scheibe', slice: 'scheibe', slices: 'scheibe',
+  bund: 'bund', bunch: 'bund',
+  glas: 'glas', 'gläser': 'glas',
 };
 
 const MASS = { mg: 0.001, g: 1, dag: 10, kg: 1000 };
@@ -71,13 +82,13 @@ export function pantryStatus(need, have) {
 export function formatAmount(value) {
   if (value == null || value === '' || Number.isNaN(Number(value))) return '';
   const rounded = Math.round(Number(value) * 100) / 100;
-  return rounded.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  return rounded.toLocaleString('de-DE', { maximumFractionDigits: 2, useGrouping: false });
 }
 
 // Mirror of formatDate in src/lib/format.js.
-export function formatDate(iso, lang) {
+export function formatDate(iso) {
   if (!iso) return '';
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString('de-DE', {
     timeZone: 'UTC',
     day: '2-digit',
     month: '2-digit',

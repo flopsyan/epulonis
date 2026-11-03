@@ -6,7 +6,6 @@ const I18N = (() => {
   catch { return {}; }
 })();
 const t = (k) => (k in I18N ? I18N[k] : k);
-const lang = document.documentElement.lang;
 
 let pantry = {};
 try {
@@ -166,7 +165,7 @@ if (dialog) {
       const batches = item.batches.filter((b) => b.amount == null || b.amount > 0);
       batchEl.replaceChildren(
         ...batches.map((b) => {
-          const label = `${b.best_before ? `${t('p_bbd')} ${formatDate(b.best_before, lang)}` : t('p_no_bbd')} (${qty(b.amount, item.unit)})`;
+          const label = `${b.best_before ? `${t('p_bbd')} ${formatDate(b.best_before)}` : t('p_no_bbd')} (${qty(b.amount, item.unit)})`;
           return new Option(label, b.id);
         })
       );

@@ -25,7 +25,7 @@ function sanitize(data) {
     description: String(data.description || '').trim(),
     image_url: String(data.image_url || '').trim(),
     servings: servings && servings > 0 ? servings : 4,
-    servings_unit: String(data.servings_unit || '').trim() || 'Servings',
+    servings_unit: String(data.servings_unit || '').trim() || 'Portionen',
     prep_time: parseIntOr(data.prep_time, 0),
     cook_time: parseIntOr(data.cook_time, 0),
     rest_time: parseIntOr(data.rest_time, 0),
@@ -229,6 +229,6 @@ export function searchRecipes(query) {
     }
   }
 
-  scored.sort((a, b) => b._score - a._score || a.title.localeCompare(b.title, 'en'));
+  scored.sort((a, b) => b._score - a._score || a.title.localeCompare(b.title, 'de'));
   return attachTags(scored);
 }

@@ -1,4 +1,4 @@
-// Display formatting (English format).
+// Display formatting (German format).
 
 // Rounds to max. 2 decimal places and drops trailing zeros.
 // Returns a string. null/empty -> ''.
@@ -6,7 +6,8 @@ export function formatAmount(value) {
   if (value == null || value === '' || Number.isNaN(Number(value))) return '';
   const num = Number(value);
   const rounded = Math.round(num * 100) / 100;
-  return rounded.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  // No thousands separator: amounts are read back from inputs, where "1.500" would be 1.5.
+  return rounded.toLocaleString('de-DE', { maximumFractionDigits: 2, useGrouping: false });
 }
 
 // Minutes -> "1 h 30 min" / "45 min".
@@ -20,10 +21,10 @@ export function formatTime(minutes) {
   return `${rest} min`;
 }
 
-// "2027-06-10" -> "10.06.2027" (de) / "10/06/2027" (en). '' for no date.
-export function formatDate(iso, lang) {
+// "2027-06-10" -> "10.06.2027". '' for no date.
+export function formatDate(iso) {
   if (!iso) return '';
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString('de-DE', {
     timeZone: 'UTC',
     day: '2-digit',
     month: '2-digit',

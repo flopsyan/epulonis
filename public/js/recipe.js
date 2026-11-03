@@ -153,7 +153,7 @@ if (article) {
       select.dataset.key = key;
       select.replaceChildren(
         ...batches.map((b) => {
-          const date = b.best_before ? `${t('p_bbd')} ${formatDate(b.best_before, document.documentElement.lang)}` : t('p_no_bbd');
+          const date = b.best_before ? `${t('p_bbd')} ${formatDate(b.best_before)}` : t('p_no_bbd');
           const amount = `${b.amount == null ? '' : formatAmount(b.amount)} ${have.unit || ''}`.trim();
           return new Option(amount ? `${date} (${amount})` : date, b.id);
         })

@@ -7,7 +7,7 @@ import { seedDemo } from './seed.js';
 import pagesRouter from './routes/pages.js';
 import apiRouter from './routes/api.js';
 import { formatAmount, formatTime, formatDate } from './lib/format.js';
-import { langFromRequest, makeT, clientStrings } from './lib/i18n.js';
+import { makeT, clientStrings } from './lib/i18n.js';
 import { attachAuth, loginPossible, bootstrapAdmin } from './lib/auth.js';
 import { oidcEnabled } from './lib/oidc.js';
 
@@ -44,15 +44,14 @@ app.use(
   })
 );
 
-// Language (from cookie), translations, navigation & search box for all views
+// Translations, navigation & search box for all views
+const t = makeT();
+// string table for the browser modules, safe to embed in a <script> tag
+const i18nJson = JSON.stringify(clientStrings()).replace(/</g, '\\u003c');
 app.use((req, res, next) => {
-  const lang = langFromRequest(req);
-  req.lang = lang;
-  req.t = makeT(lang);
-  res.locals.lang = lang;
-  res.locals.t = req.t;
-  // string table for the browser modules, safe to embed in a <script> tag
-  res.locals.i18nJson = JSON.stringify(clientStrings(lang)).replace(/</g, '\\u003c');
+  req.t = t;
+  res.locals.t = t;
+  res.locals.i18nJson = i18nJson;
   res.locals.currentPath = req.path;
   res.locals.currentUrl = req.originalUrl;
   res.locals.searchQuery = req.query.q || '';
@@ -74,7 +73,6 @@ app.use((req, res) => {
 // Error handling
 app.use((err, req, res, next) => {
   console.error(err);
-  const t = req.t || makeT('en');
   res.status(500).render('error', {
     title: t('title_error'),
     message: process.env.NODE_ENV === 'production' ? '' : String(err && err.stack ? err.stack : err),

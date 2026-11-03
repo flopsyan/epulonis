@@ -305,12 +305,11 @@ function enhanceSuggestions(input) {
 
 // ---------------------------------------------------------------- date
 // Ported from Tesseron. The hidden native date input keeps the ISO value; the visible text
-// field shows the app's format, dd.mm.yyyy (de) or dd/mm/yyyy (en), like formatDate.
+// field shows the app's format, dd.mm.yyyy, like formatDate.
 
 const pad = (n) => String(n).padStart(2, '0');
 const isoOf = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
-const isDe = () => document.documentElement.lang === 'de';
-const showDate = (iso) => (/^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso.split('-').reverse().join(isDe() ? '.' : '/') : '');
+const showDate = (iso) => (/^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso.split('-').reverse().join('.') : '');
 
 // dd.mm.yyyy or dd/mm/yyyy, also 1.7.2026, 010726, 2026-07-01; a two-digit year only once the field is left.
 function parseDate(text, final) {
@@ -396,8 +395,8 @@ function enhanceDate(input) {
 function attachCalendar(owner, btn, text, value) {
   const cal = popup(owner, 'popup-cal', 'dialog');
   cal.setAttribute('aria-label', tr('cal_open'));
-  const monthTitle = new Intl.DateTimeFormat(isDe() ? 'de-DE' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-  const weekdays = isDe() ? ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] : ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  const monthTitle = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
   let year;
   let month;
 

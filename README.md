@@ -33,7 +33,7 @@ recipes - with a servings calculator and a live match against your own pantry. I
   Add accounts for friends (all with equal rights), each with a **profile** (display name, avatar,
   password). Recipes show their **creator**. Ideal behind a reverse proxy - visitors browse, members edit.
 - **Light & dark mode** with a switch in the footer (defaults to **System**).
-- **English & German UI** with a language switch in the footer (defaults to **English**).
+- **German UI.**
 - **Images from the web** via URL, with an elegant placeholder if an image fails to load.
 - **Demo data** (3 recipes + a stocked pantry) is created automatically on first start.
 - Fully **responsive** - works on a laptop and on your phone in the kitchen.

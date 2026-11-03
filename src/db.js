@@ -39,7 +39,7 @@ db.exec(`
     description   TEXT NOT NULL DEFAULT '',
     image_url     TEXT NOT NULL DEFAULT '',
     servings      REAL NOT NULL DEFAULT 4,
-    servings_unit TEXT NOT NULL DEFAULT 'Servings',
+    servings_unit TEXT NOT NULL DEFAULT 'Portionen',
     prep_time     INTEGER NOT NULL DEFAULT 0,
     cook_time     INTEGER NOT NULL DEFAULT 0,
     rest_time     INTEGER NOT NULL DEFAULT 0,
@@ -155,6 +155,30 @@ if (!hasColumn('users', 'oidc_sub')) {
   // column, so uniqueness comes from the index (NULLs don't collide).
   db.exec('ALTER TABLE users ADD COLUMN oidc_sub TEXT');
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS users_oidc_sub ON users(oidc_sub)');
+}
+
+if (!db.prepare("SELECT 1 FROM meta WHERE key = 'units_de'").get()) {
+  // The UI became German only; units typed or picked in English are rewritten
+  // once. Matching treats both spellings alike (src/lib/units.js).
+  const UNITS = {
+    pcs: 'Stk.', pc: 'Stk.', piece: 'Stk.', pieces: 'Stk.',
+    tbsp: 'EL', tsp: 'TL', pinch: 'Prise', pinches: 'Prisen',
+    packet: 'Pck.', packets: 'Pck.', clove: 'Zehe', cloves: 'Zehen',
+    bunch: 'Bund', can: 'Dose', cans: 'Dosen', cup: 'Tasse', cups: 'Tassen',
+    slice: 'Scheibe', slices: 'Scheiben',
+  };
+  const SERVINGS = { servings: 'Portionen', slices: 'Stücke', glasses: 'Gläser' };
+  db.transaction(() => {
+    const ing = db.prepare('UPDATE ingredients SET unit = ? WHERE lower(trim(unit)) = ?');
+    const pan = db.prepare('UPDATE pantry_items SET unit = ? WHERE lower(trim(unit)) = ?');
+    for (const [en, de] of Object.entries(UNITS)) {
+      ing.run(de, en);
+      pan.run(de, en);
+    }
+    const srv = db.prepare('UPDATE recipes SET servings_unit = ? WHERE lower(trim(servings_unit)) = ?');
+    for (const [en, de] of Object.entries(SERVINGS)) srv.run(de, en);
+    db.prepare("INSERT INTO meta (key, value) VALUES ('units_de', '1')").run();
+  })();
 }
 
 export function getMeta(key) {
