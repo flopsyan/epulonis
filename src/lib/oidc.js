@@ -11,7 +11,9 @@ import {
   linkSub,
   createSsoUser,
   setAdmin,
+  clearSsoLinks,
 } from '../models/users.js';
+import { getMeta, setMeta } from '../db.js';
 
 const ISSUER = process.env.OIDC_ISSUER || '';
 
@@ -22,6 +24,20 @@ export function oidcEnabled() {
 // True when the provider group decides admin rights for linked accounts.
 export function groupAdmins() {
   return !!(ISSUER && process.env.OIDC_ADMIN_GROUP);
+}
+
+// Login only through the provider. Ignored without an issuer, or nobody could log in.
+export function ssoOnly() {
+  return !!ISSUER && process.env.OIDC_ONLY === 'true';
+}
+
+// A `sub` is only unique per issuer, so links made with another provider are void;
+// those accounts relink by username on their next login.
+export function forgetOtherIssuerLinks() {
+  if (!ISSUER || getMeta('oidc_issuer') === ISSUER) return;
+  const cleared = clearSsoLinks();
+  setMeta('oidc_issuer', ISSUER);
+  if (cleared) console.log(`SSO provider changed: cleared ${cleared} old account link(s).`);
 }
 
 // Discovery is cached; a failed attempt is dropped so the next login retries

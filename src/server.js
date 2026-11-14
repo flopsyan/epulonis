@@ -9,7 +9,7 @@ import apiRouter from './routes/api.js';
 import { formatAmount, formatTime, formatDate } from './lib/format.js';
 import { makeT, clientStrings } from './lib/i18n.js';
 import { attachAuth, loginPossible, bootstrapAdmin } from './lib/auth.js';
-import { oidcEnabled } from './lib/oidc.js';
+import { oidcEnabled, ssoOnly, forgetOtherIssuerLinks } from './lib/oidc.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
@@ -85,6 +85,7 @@ try {
 } catch (e) {
   console.error('Could not bootstrap admin account:', e);
 }
+forgetOtherIssuerLinks();
 
 // Seed demo data on startup if needed
 if (process.env.SEED_DEMO !== 'false') {
@@ -104,4 +105,5 @@ app.listen(port, () => {
     console.log('Edit protection: read-only mode (set AUTH_PASSWORD to bootstrap the first account).');
   }
   if (oidcEnabled()) console.log(`Single sign-on is ON (issuer ${process.env.OIDC_ISSUER}).`);
+  if (ssoOnly()) console.log('Password login is OFF (OIDC_ONLY).');
 });

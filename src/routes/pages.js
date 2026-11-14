@@ -34,7 +34,7 @@ import {
   setSsoIdCookie,
   takeSsoIdToken,
 } from '../lib/auth.js';
-import { oidcEnabled, groupAdmins, startLogin, finishLogin, logoutUrl, userFromClaims } from '../lib/oidc.js';
+import { oidcEnabled, groupAdmins, ssoOnly, startLogin, finishLogin, logoutUrl, userFromClaims } from '../lib/oidc.js';
 import {
   publicUser,
   getUserById,
@@ -118,7 +118,7 @@ function renderLogin(req, res, status, error, next) {
     error,
     next,
     sso: oidcEnabled(),
-    passwordLogin: hasPasswordUsers(),
+    passwordLogin: !ssoOnly() && hasPasswordUsers(),
   });
 }
 
@@ -129,6 +129,7 @@ router.get('/login', (req, res) => {
 
 router.post('/login', (req, res) => {
   if (!loginPossible()) return res.redirect('/');
+  if (ssoOnly()) return res.redirect('/login');
   const next = safeNext(req.body.next);
   if (loginBlocked(req.ip)) return renderLogin(req, res, 429, 'login_throttled', next);
   const user = authenticate(req.body.username, req.body.password);
@@ -200,7 +201,7 @@ router.get('/profile', requireAuth, (req, res) => {
   res.render('profile', {
     title: req.t('profile_title'),
     profileUser: req.user,
-    hasPassword: !!req.user.pass_hash,
+    hasPassword: !!req.user.pass_hash && !ssoOnly(),
     saved: req.query.saved === '1',
     error: req.query.error || '',
   });
@@ -210,7 +211,7 @@ router.post('/profile', requireAuth, (req, res) => {
   updateProfile(req.user.id, { display_name: req.body.display_name, avatar: req.body.avatar });
 
   // Optional password change: only when a new password was entered.
-  const newPass = String(req.body.new_password || '');
+  const newPass = ssoOnly() ? '' : String(req.body.new_password || '');
   if (newPass) {
     if (!verifyPassword(getUserById(req.user.id), req.body.current_password)) {
       return res.redirect('/profile?error=current');
@@ -233,12 +234,14 @@ router.get('/settings', requireAuth, (req, res) => {
     users: listUsers(),
     adminCount: countAdmins(),
     groupAdmins: groupAdmins(),
+    ssoOnly: ssoOnly(),
     error: req.query.error || '',
     created: req.query.created || '',
   });
 });
 
 router.post('/settings/users', requireAdmin, (req, res) => {
+  if (ssoOnly()) return res.redirect('/settings');
   const r = createUser({
     username: req.body.username,
     password: req.body.password,

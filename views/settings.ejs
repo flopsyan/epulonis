@@ -55,7 +55,7 @@
     <% }) %>
   </ul>
 
-  <% if (locals.isAdmin) { %>
+  <% if (locals.isAdmin && !ssoOnly) { %>
   <h3 class="subhead"><%= t('add_user') %></h3>
   <form method="post" action="/settings/users" class="user-add-form" autocomplete="off">
     <div class="grid-2">

@@ -109,6 +109,7 @@ Everything is configured via environment variables (see `.env.example`):
 | `OIDC_CLIENT_SECRET` | *(empty)* | Client secret at the provider |
 | `OIDC_ADMIN_GROUP` | *(empty)* | If set, members of this provider group are admins (checked on every SSO login) |
 | `OIDC_AUTO_CREATE` | `true`  | Create an account on the first SSO login if none matches the username |
+| `OIDC_ONLY` | `false` | `true` = log in only through SSO: no password form, no password change, no local accounts |
 
 > Demo data is only created **once**. If you later empty the database, nothing comes back
 > unexpectedly. For an empty start, set `SEED_DEMO=false`.
@@ -137,7 +138,7 @@ your own login.
 ### Single sign-on (OIDC, e.g. Keycloak)
 
 Optional. With `OIDC_ISSUER` set, the login page offers **Log in with SSO** next to the password
-form, which stays as a fallback. Without it, nothing changes.
+form, which stays as a fallback unless `OIDC_ONLY=true`. Without it, nothing changes.
 
 1. Create a client at the provider (in Keycloak: *Clients → Create client*, OpenID Connect,
    *Client authentication* on, *Standard flow* only).
@@ -156,6 +157,8 @@ How accounts are matched:
   user ID, so renaming at the provider does not matter.
 - Matching by username trusts the provider's usernames: keep self-registration off there.
 - Accounts created by SSO have no password and can only log in through SSO.
+- Switching to another provider or realm (a new `OIDC_ISSUER`) drops all existing links once at
+  startup, so every account relinks by username on its next login.
 - With `OIDC_ADMIN_GROUP` set, the provider decides who is admin, also for a linked local admin:
   add yourself to the group before your first SSO login.
 - Logging out also ends the session at the provider.

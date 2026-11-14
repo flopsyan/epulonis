@@ -24,6 +24,7 @@ services:
       OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
       OIDC_ADMIN_GROUP: ${OIDC_ADMIN_GROUP:-}
       OIDC_AUTO_CREATE: ${OIDC_AUTO_CREATE:-true}
+      OIDC_ONLY: ${OIDC_ONLY:-false}
     volumes:
       # Persistent data (SQLite database)
       - recipe-data:/app/data

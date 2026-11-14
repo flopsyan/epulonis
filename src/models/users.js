@@ -85,6 +85,10 @@ export function getUserBySub(sub) {
   return db.prepare('SELECT * FROM users WHERE oidc_sub = ?').get(String(sub));
 }
 
+export function clearSsoLinks() {
+  return db.prepare('UPDATE users SET oidc_sub = NULL WHERE oidc_sub IS NOT NULL').run().changes;
+}
+
 export function linkSub(id, sub) {
   db.prepare(`UPDATE users SET oidc_sub = ?, updated_at = datetime('now') WHERE id = ?`).run(String(sub), id);
 }
