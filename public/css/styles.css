@@ -303,6 +303,7 @@ img { max-width: 100%; display: block; }
 .icon-btn .icon { width: 18px; height: 18px; }
 .icon-btn:hover { background: var(--surface-2); color: var(--text); }
 .icon-btn.danger:hover { background: var(--missing-bg); color: var(--missing); }
+.icon-btn.is-on { color: var(--primary); }
 .icon-btn-gap { width: 40px; height: 40px; flex: none; }
 
 /* ---------- Page head ---------- */

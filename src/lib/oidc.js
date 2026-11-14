@@ -19,6 +19,11 @@ export function oidcEnabled() {
   return !!ISSUER;
 }
 
+// True when the provider group decides admin rights for linked accounts.
+export function groupAdmins() {
+  return !!(ISSUER && process.env.OIDC_ADMIN_GROUP);
+}
+
 // Discovery is cached; a failed attempt is dropped so the next login retries
 // instead of staying broken until a restart (e.g. Keycloak started later).
 let configPromise = null;

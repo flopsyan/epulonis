@@ -4,7 +4,7 @@ const I18N = (() => {
   catch { return {}; }
 })();
 
-function ask(text, action) {
+function ask(text, action, actionClass = 'btn-danger') {
   return new Promise((resolve) => {
     const dialog = document.createElement('dialog');
     dialog.className = 'ask';
@@ -14,7 +14,7 @@ function ask(text, action) {
     heading.textContent = text;
     const row = document.createElement('div');
     row.className = 'ask-actions';
-    for (const [label, cls, value] of [[I18N.cancel || 'Cancel', 'btn-ghost', 'no'], [action, 'btn-danger', 'yes']]) {
+    for (const [label, cls, value] of [[I18N.cancel || 'Cancel', 'btn-ghost', 'no'], [action, actionClass, 'yes']]) {
       const btn = document.createElement('button');
       btn.className = `btn ${cls}`;
       btn.textContent = label;
@@ -40,7 +40,7 @@ document.addEventListener('submit', async (e) => {
   if (!form.dataset?.confirm || confirmed.has(form)) return;
   e.preventDefault();
   const submitter = e.submitter;
-  if (await ask(form.dataset.confirm, form.dataset.confirmAction || I18N.delete || 'Delete')) {
+  if (await ask(form.dataset.confirm, form.dataset.confirmAction || I18N.delete || 'Delete', form.dataset.confirmStyle)) {
     confirmed.add(form);
     form.requestSubmit(submitter);
   }

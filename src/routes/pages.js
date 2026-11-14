@@ -34,7 +34,7 @@ import {
   setSsoIdCookie,
   takeSsoIdToken,
 } from '../lib/auth.js';
-import { oidcEnabled, startLogin, finishLogin, logoutUrl, userFromClaims } from '../lib/oidc.js';
+import { oidcEnabled, groupAdmins, startLogin, finishLogin, logoutUrl, userFromClaims } from '../lib/oidc.js';
 import {
   publicUser,
   getUserById,
@@ -44,6 +44,8 @@ import {
   updateProfile,
   changePassword,
   deleteUser,
+  changeAdmin,
+  countAdmins,
   hasPasswordUsers,
 } from '../models/users.js';
 
@@ -229,6 +231,8 @@ router.get('/settings', requireAuth, (req, res) => {
   res.render('settings', {
     title: req.t('settings_title'),
     users: listUsers(),
+    adminCount: countAdmins(),
+    groupAdmins: groupAdmins(),
     error: req.query.error || '',
     created: req.query.created || '',
   });
@@ -249,6 +253,15 @@ router.post('/settings/users/:id/delete', requireAdmin, (req, res) => {
   if (r.error) return res.redirect(`/settings?error=${encodeURIComponent(r.error)}`);
   // If you deleted your own account, the session is now invalid.
   res.redirect(Number(req.params.id) === req.user.id ? '/' : '/settings');
+});
+
+router.post('/settings/users/:id/admin', requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  // The next SSO login would overwrite the flag again.
+  if (groupAdmins() && getUserById(id)?.oidc_sub) return res.redirect('/settings?error=admin_from_group');
+  const r = changeAdmin(id, req.body.admin === '1');
+  if (r.error) return res.redirect(`/settings?error=${encodeURIComponent(r.error)}`);
+  res.redirect('/settings');
 });
 
 // --- New recipe ------------------------------------------------------------

@@ -55,7 +55,7 @@ export function getUserByUsername(username) {
 
 export function listUsers() {
   return db
-    .prepare('SELECT id, username, display_name, avatar, is_admin, created_at FROM users ORDER BY username COLLATE NOCASE ASC')
+    .prepare('SELECT id, username, display_name, avatar, is_admin, oidc_sub IS NOT NULL AS sso, created_at FROM users ORDER BY username COLLATE NOCASE ASC')
     .all();
 }
 
@@ -108,6 +108,19 @@ export function setAdmin(id, isAdminFlag) {
   db.prepare(`UPDATE users SET is_admin = ?, updated_at = datetime('now') WHERE id = ?`).run(isAdminFlag ? 1 : 0, id);
 }
 
+export function countAdmins() {
+  return db.prepare('SELECT COUNT(*) AS c FROM users WHERE is_admin = 1').get().c;
+}
+
+// Admin toggle from the settings page; the last admin keeps the role, or nobody
+// could manage accounts anymore.
+export const changeAdmin = db.transaction((id, isAdminFlag) => {
+  const target = getUserById(id);
+  if (!isAdminFlag && target?.is_admin && countAdmins() <= 1) return { error: 'last_admin_revoke' };
+  setAdmin(id, isAdminFlag);
+  return { ok: true };
+});
+
 export function updateProfile(id, { display_name, avatar } = {}) {
   db.prepare(
     `UPDATE users SET display_name = ?, avatar = ?, updated_at = datetime('now') WHERE id = ?`
@@ -131,10 +144,8 @@ export const deleteUser = db.transaction((id) => {
   if (countUsers() <= 1) return { error: 'last_user' };
   const target = getUserById(id);
   // Never remove the last admin, or nobody could manage accounts anymore.
-  if (target && target.is_admin) {
-    const admins = db.prepare('SELECT COUNT(*) AS c FROM users WHERE is_admin = 1').get().c;
-    if (admins <= 1) return { error: 'last_admin' };
-  }
+  // Never remove the last admin, or nobody could manage accounts anymore.
+  if (target && target.is_admin && countAdmins() <= 1) return { error: 'last_admin' };
   db.prepare('UPDATE recipes SET author_id = NULL WHERE author_id = ?').run(id);
   db.prepare('DELETE FROM users WHERE id = ?').run(id);
   return { ok: true };

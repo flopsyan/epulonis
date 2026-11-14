@@ -34,6 +34,17 @@
           <span class="user-row-name"><%= u.display_name || u.username %><% if (u.is_admin) { %> <span class="role-badge"><%= t('role_admin') %></span><% } %><% if (u.id === locals.user.id) { %> <span class="you-badge"><%= t('you') %></span><% } %></span>
           <span class="user-row-sub">@<%= u.username %></span>
         </span>
+        <% if (locals.isAdmin && !(groupAdmins && u.sso) && !(u.is_admin && adminCount <= 1)) { %>
+          <% const isSelf = u.id === locals.user.id; %>
+          <form method="post" action="/settings/users/<%= u.id %>/admin"
+                <% if (u.is_admin) { %>data-confirm="<%= isSelf ? t('confirm_revoke_admin_self') : t('confirm_revoke_admin') %>" data-confirm-action="<%= t('revoke_admin_action') %>"
+                <% } else { %>data-confirm="<%= t('confirm_make_admin') %>" data-confirm-action="<%= t('make_admin') %>" data-confirm-style="btn-primary"<% } %>>
+            <input type="hidden" name="admin" value="<%= u.is_admin ? '0' : '1' %>" />
+            <button type="submit" class="icon-btn<%= u.is_admin ? ' is-on' : '' %>" title="<%= u.is_admin ? t('revoke_admin') : t('make_admin') %>" aria-label="<%= u.is_admin ? t('revoke_admin') : t('make_admin') %>"><%- include('partials/icon', { name: u.is_admin ? 'shield-check' : 'shield' }) %></button>
+          </form>
+        <% } else if (locals.isAdmin) { %>
+          <span class="icon-btn-gap" aria-hidden="true"></span>
+        <% } %>
         <% if (locals.isAdmin && users.length > 1) { %>
           <form method="post" action="/settings/users/<%= u.id %>/delete"
                 data-confirm="<%= u.id === locals.user.id ? t('confirm_delete_self') : t('confirm_delete_user') %>" data-confirm-action="<%= t('p_remove') %>">
